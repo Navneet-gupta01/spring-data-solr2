@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.data.mapping.context.MappingContextEvent;
 import org.springframework.data.solr.core.mapping.SolrPersistentEntity;
 import org.springframework.data.solr.server.SolrClientFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -34,7 +33,7 @@ import org.springframework.util.CollectionUtils;
 public class SolrPersistentEntitySchemaCreator implements ApplicationListener<MappingContextEvent<?, ?>> {
 
 	public enum Feature {
-		CREATE_MISSING_FIELDS
+		CREATE_MISSING_FIELDS;
 	}
 
 	private SolrClientFactory factory;
@@ -42,18 +41,18 @@ public class SolrPersistentEntitySchemaCreator implements ApplicationListener<Ma
 	private SolrSchemaResolver schemaResolver;
 	private ConcurrentHashMap<Class<?>, Class<?>> processed;
 
-	private Set<Feature> features = new HashSet<>();
+	private Set<Feature> features = new HashSet<Feature>();
 
 	public SolrPersistentEntitySchemaCreator(SolrClientFactory solrClientFactory) {
 		this(solrClientFactory, null);
 	}
 
-	public SolrPersistentEntitySchemaCreator(SolrClientFactory factory, @Nullable SolrSchemaWriter schemaWriter) {
+	public SolrPersistentEntitySchemaCreator(SolrClientFactory factory, SolrSchemaWriter schemaWriter) {
 		super();
 		this.factory = factory;
 		this.schemaWriter = schemaWriter != null ? schemaWriter : new SolrSchemaWriter(this.factory);
 		this.schemaResolver = new SolrSchemaResolver();
-		this.processed = new ConcurrentHashMap<>();
+		this.processed = new ConcurrentHashMap<Class<?>, Class<?>>();
 	}
 
 	private void process(SolrPersistentEntity<?> entity) {
@@ -87,7 +86,7 @@ public class SolrPersistentEntitySchemaCreator implements ApplicationListener<Ma
 		}
 	}
 
-	public SolrPersistentEntitySchemaCreator enable(@Nullable Feature feature) {
+	public SolrPersistentEntitySchemaCreator enable(Feature feature) {
 
 		if (feature != null) {
 			this.features.add(feature);

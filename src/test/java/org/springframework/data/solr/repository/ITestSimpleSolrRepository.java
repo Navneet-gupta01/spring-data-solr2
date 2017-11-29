@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,10 @@ public class ITestSimpleSolrRepository extends AbstractITestWithEmbeddedSolrServ
 
 	@Before
 	public void setUp() {
-
-		SolrTemplate template = new SolrTemplate(server);
+		repository = new ExampleSolrBeanRepository();
+		SolrTemplate template = new SolrTemplate(server, "collection1");
 		template.afterPropertiesSet();
-
-		repository = new ExampleSolrBeanRepository(template, ExampleSolrBean.class);
+		repository.setSolrOperations(template);
 	}
 
 	@Test
@@ -49,31 +48,32 @@ public class ITestSimpleSolrRepository extends AbstractITestWithEmbeddedSolrServ
 
 		Assert.assertSame(toInsert, savedBean);
 
-		Assert.assertTrue(repository.existsById(savedBean.getId()));
+		Assert.assertTrue(repository.exists(savedBean.getId()));
 
-		ExampleSolrBean retrieved = repository.findById(savedBean.getId()).get();
+		ExampleSolrBean retrieved = repository.findOne(savedBean.getId());
 		Assert.assertNotNull(retrieved);
 		Assert.assertTrue(EqualsBuilder.reflectionEquals(savedBean, retrieved, new String[] { "version" }));
 
 		Assert.assertEquals(1, repository.count());
 
-		Assert.assertTrue(repository.existsById(savedBean.getId()));
+		Assert.assertTrue(repository.exists(savedBean.getId()));
 
 		repository.delete(savedBean);
 
 		Assert.assertEquals(0, repository.count());
-		Assert.assertFalse(repository.findById(savedBean.getId()).isPresent());
+		retrieved = repository.findOne(savedBean.getId());
+		Assert.assertNull(retrieved);
 	}
 
 	@Test
 	public void testListFunctions() {
 		int objectCount = 100;
-		List<ExampleSolrBean> toInsert = new ArrayList<>(objectCount);
+		List<ExampleSolrBean> toInsert = new ArrayList<ExampleSolrBean>(objectCount);
 		for (int i = 0; i < 100; i++) {
 			toInsert.add(createExampleBeanWithId(Integer.toString(i)));
 		}
 
-		repository.saveAll(toInsert);
+		repository.save(toInsert);
 
 		Assert.assertEquals(objectCount, repository.count());
 

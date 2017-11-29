@@ -15,18 +15,19 @@
  */
 package org.springframework.data.solr.repository;
 
-import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.hamcrest.collection.IsIterableContainingInOrder.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.hamcrest.Matchers;
+import org.hamcrest.collection.IsCollectionWithSize;
 import org.hamcrest.collection.IsEmptyCollection;
+import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsCollectionContaining;
 import org.hamcrest.core.IsEqual;
@@ -85,7 +86,7 @@ public class ITestSolrRepositoryOperations {
 	@Before
 	public void setUp() {
 		repo.deleteAll();
-		repo.saveAll(
+		repo.save(
 				Arrays.asList(POPULAR_AVAILABLE_PRODUCT, UNPOPULAR_AVAILABLE_PRODUCT, UNAVAILABLE_PRODUCT, NAMED_PRODUCT));
 	}
 
@@ -96,23 +97,23 @@ public class ITestSolrRepositoryOperations {
 
 	@Test
 	public void testFindOne() {
-		ProductBean found = repo.findById(POPULAR_AVAILABLE_PRODUCT.getId()).get();
+		ProductBean found = repo.findOne(POPULAR_AVAILABLE_PRODUCT.getId());
 		Assert.assertEquals(POPULAR_AVAILABLE_PRODUCT.getId(), found.getId());
 	}
 
 	@Test
 	public void testFindOneThatDoesNotExist() {
-		Assert.assertFalse(repo.findById(POPULAR_AVAILABLE_PRODUCT.getId().concat("XX-XX-XX")).isPresent());
+		Assert.assertNull(repo.findOne(POPULAR_AVAILABLE_PRODUCT.getId().concat("XX-XX-XX")));
 	}
 
 	@Test
 	public void testExists() {
-		Assert.assertTrue(repo.existsById(POPULAR_AVAILABLE_PRODUCT.getId()));
+		Assert.assertTrue(repo.exists(POPULAR_AVAILABLE_PRODUCT.getId()));
 	}
 
 	@Test
 	public void testExistsOneThatDoesNotExist() {
-		Assert.assertFalse(repo.existsById(POPULAR_AVAILABLE_PRODUCT.getId().concat("XX-XX-XX")));
+		Assert.assertFalse(repo.exists(POPULAR_AVAILABLE_PRODUCT.getId().concat("XX-XX-XX")));
 	}
 
 	@Test
@@ -172,7 +173,7 @@ public class ITestSolrRepositoryOperations {
 
 	@Test
 	public void testFindSingleElementByIs() {
-		ProductBean product = repo.findProductBeanById(POPULAR_AVAILABLE_PRODUCT.getId());
+		ProductBean product = repo.findById(POPULAR_AVAILABLE_PRODUCT.getId());
 		Assert.assertNotNull(product);
 		Assert.assertEquals(POPULAR_AVAILABLE_PRODUCT.getId(), product.getId());
 	}
@@ -204,7 +205,7 @@ public class ITestSolrRepositoryOperations {
 		ProductBean modifiedMid2011 = createProductBean("2011", 5, true);
 		modifiedMid2011.setLastModified(new DateTime(2011, 6, 1, 0, 0, 0, DateTimeZone.UTC).toDate());
 
-		repo.saveAll(Arrays.asList(modifiedMid2012, modifiedMid2011));
+		repo.save(Arrays.asList(modifiedMid2012, modifiedMid2011));
 		List<ProductBean> found = repo
 				.findByLastModifiedBefore(new DateTime(2011, 12, 31, 23, 59, 59, DateTimeZone.UTC).toDate());
 		Assert.assertEquals(1, found.size());
@@ -233,7 +234,7 @@ public class ITestSolrRepositoryOperations {
 		ProductBean modifiedMid2011 = createProductBean("2011", 5, true);
 		modifiedMid2011.setLastModified(new DateTime(2011, 6, 1, 0, 0, 0, DateTimeZone.UTC).toDate());
 
-		repo.saveAll(Arrays.asList(modifiedMid2012, modifiedMid2011));
+		repo.save(Arrays.asList(modifiedMid2012, modifiedMid2011));
 		List<ProductBean> found = repo
 				.findByLastModifiedAfter(new DateTime(2012, 1, 1, 0, 0, 0, DateTimeZone.UTC).toDate());
 		Assert.assertEquals(1, found.size());
@@ -300,7 +301,7 @@ public class ITestSolrRepositoryOperations {
 		ProductBean locatedInNYC = createProductBean("200", 5, true);
 		locatedInNYC.setLocation("40.7143,-74.006");
 
-		repo.saveAll(Arrays.asList(locatedInBuffalow, locatedInNYC));
+		repo.save(Arrays.asList(locatedInBuffalow, locatedInNYC));
 
 		List<ProductBean> found = repo.findByLocationWithin(new Point(45.15, -93.85), new Distance(5));
 		Assert.assertEquals(1, found.size());
@@ -315,7 +316,7 @@ public class ITestSolrRepositoryOperations {
 		ProductBean locatedInNYC = createProductBean("200", 5, true);
 		locatedInNYC.setLocation("40.7143,-74.006");
 
-		repo.saveAll(Arrays.asList(locatedInBuffalow, locatedInNYC));
+		repo.save(Arrays.asList(locatedInBuffalow, locatedInNYC));
 
 		List<ProductBean> found = repo.findByLocationNear(new Point(45.15, -93.85), new Distance(5));
 		Assert.assertEquals(1, found.size());
@@ -330,7 +331,7 @@ public class ITestSolrRepositoryOperations {
 		ProductBean locatedInNYC = createProductBean("200", 5, true);
 		locatedInNYC.setLocation("40.7143,-74.006");
 
-		repo.saveAll(Arrays.asList(locatedInBuffalow, locatedInNYC));
+		repo.save(Arrays.asList(locatedInBuffalow, locatedInNYC));
 
 		List<ProductBean> found = repo.findByLocationNear(new Box(new Point(45, -94), new Point(46, -93)));
 		Assert.assertEquals(1, found.size());
@@ -341,11 +342,11 @@ public class ITestSolrRepositoryOperations {
 	public void testFindWithSortAsc() {
 		repo.deleteAll();
 
-		List<ProductBean> values = new ArrayList<>();
+		List<ProductBean> values = new ArrayList<ProductBean>();
 		for (int i = 0; i < 10; i++) {
 			values.add(createProductBean(Integer.toString(i), i, true));
 		}
-		repo.saveAll(values);
+		repo.save(values);
 
 		List<ProductBean> found = repo.findByAvailableTrueOrderByPopularityAsc();
 
@@ -361,11 +362,11 @@ public class ITestSolrRepositoryOperations {
 	public void testFindWithSortDesc() {
 		repo.deleteAll();
 
-		List<ProductBean> values = new ArrayList<>();
+		List<ProductBean> values = new ArrayList<ProductBean>();
 		for (int i = 0; i < 10; i++) {
 			values.add(createProductBean(Integer.toString(i), i, true));
 		}
-		repo.saveAll(values);
+		repo.save(values);
 
 		List<ProductBean> found = repo.findByAvailableTrueOrderByPopularityDesc();
 
@@ -381,11 +382,11 @@ public class ITestSolrRepositoryOperations {
 	public void testFindWithSortDescForAnnotatedQuery() {
 		repo.deleteAll();
 
-		List<ProductBean> values = new ArrayList<>();
+		List<ProductBean> values = new ArrayList<ProductBean>();
 		for (int i = 0; i < 10; i++) {
 			values.add(createProductBean(Integer.toString(i), i, true));
 		}
-		repo.saveAll(values);
+		repo.save(values);
 
 		List<ProductBean> found = repo.findByAvailableWithAnnotatedQueryUsingSort(true,
 				new Sort(Direction.DESC, "popularity"));
@@ -402,11 +403,11 @@ public class ITestSolrRepositoryOperations {
 	public void testFindWithSortDescInPageableForAnnotatedQuery() {
 		repo.deleteAll();
 
-		List<ProductBean> values = new ArrayList<>();
+		List<ProductBean> values = new ArrayList<ProductBean>();
 		for (int i = 0; i < 10; i++) {
 			values.add(createProductBean(Integer.toString(i), i, true));
 		}
-		repo.saveAll(values);
+		repo.save(values);
 
 		Page<ProductBean> found = repo.findByAvailableWithAnnotatedQueryUsingSortInPageable(true,
 				new PageRequest(0, 50, new Sort(Direction.DESC, "popularity")));
@@ -423,11 +424,11 @@ public class ITestSolrRepositoryOperations {
 	public void testFindWithSortDescForNamedQuery() {
 		repo.deleteAll();
 
-		List<ProductBean> values = new ArrayList<>();
+		List<ProductBean> values = new ArrayList<ProductBean>();
 		for (int i = 0; i < 10; i++) {
 			values.add(createProductBean(Integer.toString(i), i, true));
 		}
-		repo.saveAll(values);
+		repo.save(values);
 
 		List<ProductBean> found = repo.findByAvailableWithSort(true, new Sort(Direction.DESC, "popularity"));
 
@@ -443,11 +444,11 @@ public class ITestSolrRepositoryOperations {
 	public void testFindWithSortDescInPageableForNamedQuery() {
 		repo.deleteAll();
 
-		List<ProductBean> values = new ArrayList<>();
+		List<ProductBean> values = new ArrayList<ProductBean>();
 		for (int i = 0; i < 10; i++) {
 			values.add(createProductBean(Integer.toString(i), i, true));
 		}
-		repo.saveAll(values);
+		repo.save(values);
 
 		Page<ProductBean> found = repo.findByAvailableWithSort(true,
 				new PageRequest(0, 30, new Sort(Direction.DESC, "popularity")));
@@ -753,7 +754,7 @@ public class ITestSolrRepositoryOperations {
 
 	@Test
 	public void testDefaultAndOperator() {
-		List<ProductBean> found = repo.findByAvailableIn(Collections.singletonList(Boolean.TRUE));
+		List<ProductBean> found = repo.findByAvailableIn(Arrays.asList(Boolean.TRUE));
 		Assert.assertEquals(3, found.size());
 
 		found = repo.findByAvailableIn(Arrays.asList(Boolean.TRUE, Boolean.FALSE));
@@ -762,7 +763,7 @@ public class ITestSolrRepositoryOperations {
 
 	@Test
 	public void testDefaultOrOperator() {
-		List<ProductBean> found = repo.findByAvailableInWithOrOperator(Collections.singletonList(Boolean.TRUE));
+		List<ProductBean> found = repo.findByAvailableInWithOrOperator(Arrays.asList(Boolean.TRUE));
 		Assert.assertEquals(3, found.size());
 
 		found = repo.findByAvailableInWithOrOperator(Arrays.asList(Boolean.TRUE, Boolean.FALSE));
@@ -779,12 +780,12 @@ public class ITestSolrRepositoryOperations {
 	public void testWithBoost() {
 		repo.deleteAll();
 		ProductBean beanWithName = createProductBean("1", 5, true, "stackoverflow");
-		beanWithName.setTitle(Collections.singletonList("indexoutofbounds"));
+		beanWithName.setTitle(Arrays.asList("indexoutofbounds"));
 
 		ProductBean beanWithTitle = createProductBean("2", 5, true, "indexoutofbounds");
-		beanWithTitle.setTitle(Collections.singletonList("stackoverflow"));
+		beanWithTitle.setTitle(Arrays.asList("stackoverflow"));
 
-		repo.saveAll(Arrays.asList(beanWithName, beanWithTitle));
+		repo.save(Arrays.asList(beanWithName, beanWithTitle));
 
 		List<ProductBean> found = repo.findByNameStartsWithOrTitleStartsWith("indexoutofbounds", "indexoutofbounds");
 		Assert.assertEquals(2, found.size());
@@ -913,7 +914,7 @@ public class ITestSolrRepositoryOperations {
 
 		long referenceCount = repo.count();
 		repo.deleteByName(NAMED_PRODUCT.getName());
-		assertThat(repo.existsById(NAMED_PRODUCT.getId()), Is.is(false));
+		assertThat(repo.exists(NAMED_PRODUCT.getId()), Is.is(false));
 		assertThat(repo.count(), Is.is(referenceCount - 1));
 	}
 
@@ -922,7 +923,7 @@ public class ITestSolrRepositoryOperations {
 
 		long referenceCount = repo.count();
 		long nrDeleted = repo.deleteProductBeanByName(NAMED_PRODUCT.getName());
-		assertThat(repo.existsById(NAMED_PRODUCT.getId()), Is.is(false));
+		assertThat(repo.exists(NAMED_PRODUCT.getId()), Is.is(false));
 		assertThat(repo.count(), Is.is(referenceCount - nrDeleted));
 	}
 
@@ -930,7 +931,7 @@ public class ITestSolrRepositoryOperations {
 	public void testDerivedDeleteByQueryRemovesDocumentAndReturnsListOfDeletedDocumentsCorrectly() {
 
 		List<ProductBean> result = repo.removeByName(NAMED_PRODUCT.getName());
-		assertThat(repo.existsById(NAMED_PRODUCT.getId()), Is.is(false));
+		assertThat(repo.exists(NAMED_PRODUCT.getId()), Is.is(false));
 		assertThat(result, hasSize(1));
 		assertThat(result.get(0).getId(), IsEqual.equalTo(NAMED_PRODUCT.getId()));
 	}
@@ -940,7 +941,7 @@ public class ITestSolrRepositoryOperations {
 
 		long referenceCount = repo.count();
 		repo.removeUsingAnnotatedQuery(NAMED_PRODUCT.getName());
-		assertThat(repo.existsById(NAMED_PRODUCT.getId()), Is.is(false));
+		assertThat(repo.exists(NAMED_PRODUCT.getId()), Is.is(false));
 		assertThat(repo.count(), Is.is(referenceCount - 1));
 	}
 
@@ -955,7 +956,7 @@ public class ITestSolrRepositoryOperations {
 	public void findTopNResultAppliesLimitationForPageableCorrectly() {
 
 		List<ProductBean> beans = createProductBeans(10, "top");
-		repo.saveAll(beans);
+		repo.save(beans);
 
 		Page<ProductBean> result = repo.findTop3ByNameStartsWith("to", new PageRequest(0, 2));
 		assertThat(result.getNumberOfElements(), IsEqual.equalTo(2));
@@ -966,7 +967,7 @@ public class ITestSolrRepositoryOperations {
 	public void findTopNResultAppliesLimitationForPageableCorrectlyForPage1() {
 
 		List<ProductBean> beans = createProductBeans(10, "top");
-		repo.saveAll(beans);
+		repo.save(beans);
 
 		Page<ProductBean> result = repo.findTop3ByNameStartsWith("to", new PageRequest(1, 2));
 		assertThat(result.getNumberOfElements(), IsEqual.equalTo(1));
@@ -976,7 +977,7 @@ public class ITestSolrRepositoryOperations {
 	@Test // DATASOLR-170
 	public void findTopNResultReturnsEmptyListIfOusideOfRange() {
 
-		repo.saveAll(createProductBeans(10, "top"));
+		repo.save(createProductBeans(10, "top"));
 
 		Page<ProductBean> result = repo.findTop3ByNameStartsWith("to", new PageRequest(1, 5));
 		assertThat(result.getNumberOfElements(), IsEqual.equalTo(0));
@@ -986,7 +987,7 @@ public class ITestSolrRepositoryOperations {
 	@Test // DATASOLR-186
 	public void sliceShouldReturnCorrectly() {
 
-		repo.saveAll(createProductBeans(10, "slice"));
+		repo.save(createProductBeans(10, "slice"));
 
 		Slice<ProductBean> slice = repo.findProductBeanByName("slice", new PageRequest(0, 2));
 		assertThat(slice.getNumberOfElements(), Is.is(2));
@@ -995,7 +996,7 @@ public class ITestSolrRepositoryOperations {
 	@Test // DATASOLR-186
 	public void sliceShouldReturnAllElementsWhenPageableIsBigEnoughCorrectly() {
 
-		repo.saveAll(createProductBeans(10, "slice"));
+		repo.save(createProductBeans(10, "slice"));
 
 		Slice<ProductBean> slice = repo.findProductBeanByName("slice", new PageRequest(0, 20));
 		assertThat(slice.getNumberOfElements(), Is.is(10));
@@ -1004,7 +1005,7 @@ public class ITestSolrRepositoryOperations {
 	@Test // DATASOLR-186
 	public void sliceShouldBeEmptyWhenPageableOutOfRange() {
 
-		repo.saveAll(createProductBeans(10, "slice"));
+		repo.save(createProductBeans(10, "slice"));
 
 		Slice<ProductBean> slice = repo.findProductBeanByName("slice", new PageRequest(1, 20));
 		assertThat(slice.hasContent(), Is.is(false));
@@ -1063,7 +1064,7 @@ public class ITestSolrRepositoryOperations {
 		ProductBean json = createProductBean("6", 3, true, "json");
 		json.setContentType(ContentType.JSON);
 
-		repo.saveAll(Arrays.asList(html, json));
+		repo.save(Arrays.asList(html, json));
 
 		List<ProductBean> result = repo.findByContentType(ContentType.HTML);
 		assertThat(result, hasSize(1));
@@ -1072,7 +1073,7 @@ public class ITestSolrRepositoryOperations {
 
 	private static List<ProductBean> createProductBeans(int nrToCreate, String prefix) {
 
-		List<ProductBean> beans = new ArrayList<>(nrToCreate);
+		List<ProductBean> beans = new ArrayList<ProductBean>(nrToCreate);
 		for (int i = 0; i < nrToCreate; i++) {
 			String id = StringUtils.hasText(prefix) ? (prefix + "-" + i) : Integer.toString(i);
 			beans.add(createProductBean(id, 0, true, id));

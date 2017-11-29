@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * TermsQueryParser is capable of building {@link SolrQuery} for {@link TermsQuery}
- *
+ * 
  * @author Christoph Strobl
  */
 public class TermsQueryParser extends QueryParserBase<TermsQuery> {
@@ -90,7 +90,7 @@ public class TermsQueryParser extends QueryParserBase<TermsQuery> {
 	}
 
 	protected void appendTermsFieldToSolrQuery(Field field, SolrQuery solrQuery) {
-		if (StringUtils.hasText(field.getName())) {
+		if (field != null && StringUtils.hasText(field.getName())) {
 			solrQuery.addTermsField(field.getName());
 		}
 	}

@@ -25,18 +25,16 @@ import java.lang.reflect.Field;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.data.annotation.Reference;
 import org.springframework.data.mapping.PersistentEntity;
-import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.data.solr.repository.Score;
-import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.data.util.TypeInformation;
 
 /**
  * @author Francisco Spaeth
  * @author Christoph Strobl
- * @author Mark Paluch
  */
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleSolrPersistentPropertyTest {
@@ -47,8 +45,8 @@ public class SimpleSolrPersistentPropertyTest {
 
 	@Test // DATASOLR-210
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void scoredPropertyShouldBeReadOnlyAndNotWritable()
-			throws NoSuchFieldException, SecurityException, IntrospectionException {
+	public void scoredPropertyShouldBeReadOnlyAndNotWritable() throws NoSuchFieldException, SecurityException,
+			IntrospectionException {
 
 		Field field = BeanWithScore.class.getDeclaredField("myScoreProperty");
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor("myScoreProperty", BeanWithScore.class, null, null);
@@ -57,21 +55,42 @@ public class SimpleSolrPersistentPropertyTest {
 		when(owner.getTypeInformation()).thenReturn(typeInformation);
 		when(typeInformation.getProperty("myScoreProperty")).thenReturn((TypeInformation) typeInformation);
 
-		SimpleSolrPersistentProperty property = new SimpleSolrPersistentProperty(
-				Property.of(ClassTypeInformation.from(BeanWithScore.class), field, propertyDescriptor), owner,
+		SimpleSolrPersistentProperty property = new SimpleSolrPersistentProperty(field, propertyDescriptor, owner,
 				simpleTypeHolder);
 
 		assertTrue(property.isScoreProperty());
 		assertFalse(property.isWritable());
 	}
 
+	@Test // DATASOLR-341
+	public void propertyWithReferenceAnnotationShouldNotBeTreatedAsAssociation() throws NoSuchFieldException, IntrospectionException {
+
+		Field field = BeanWithScore.class.getDeclaredField("reference");
+		PropertyDescriptor propertyDescriptor = new PropertyDescriptor("reference", BeanWithScore.class, null, null);
+
+		when(owner.getType()).thenReturn((Class) BeanWithScore.class);
+		when(owner.getTypeInformation()).thenReturn(typeInformation);
+		when(typeInformation.getProperty("reference")).thenReturn((TypeInformation) typeInformation);
+
+		SimpleSolrPersistentProperty property = new SimpleSolrPersistentProperty(field, propertyDescriptor, owner,
+				simpleTypeHolder);
+
+		assertFalse(property.isAssociation());
+	}
+
 	static class BeanWithScore {
 
 		@Score Float myScoreProperty;
+		@Reference BeanWithScore reference;
 
 		public Float getMyScoreProperty() {
 			return myScoreProperty;
 		}
+
+		public BeanWithScore getReference() {
+			return reference;
+		}
+
 	}
 
 }

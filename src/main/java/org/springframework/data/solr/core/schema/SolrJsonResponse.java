@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.data.solr.core.schema;
 import org.apache.solr.client.solrj.response.SolrResponseBase;
 import org.apache.solr.common.util.NamedList;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -32,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SolrJsonResponse extends SolrResponseBase {
 
 	private static final long serialVersionUID = 5727953031460362404L;
-	private @Nullable JsonNode root;
+	private JsonNode root;
 	private ObjectMapper mapper;
 
 	public SolrJsonResponse() {
@@ -66,7 +65,6 @@ public class SolrJsonResponse extends SolrResponseBase {
 		}
 	}
 
-	@Nullable
 	public String getJsonResponse() {
 		return (String) getResponse().get("json");
 	}

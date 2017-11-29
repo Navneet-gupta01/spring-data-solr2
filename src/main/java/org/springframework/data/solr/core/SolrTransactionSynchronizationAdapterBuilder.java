@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.springframework.data.solr.core;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.util.Assert;
 
@@ -25,8 +24,7 @@ import org.springframework.util.Assert;
  */
 public class SolrTransactionSynchronizationAdapterBuilder {
 
-	@Nullable SolrTransactionSynchronizationAdapter adapter;
-	@Nullable private String collectionName;
+	SolrTransactionSynchronizationAdapter adapter;
 
 	/**
 	 * @param solrOperations must not be {@literal null}
@@ -41,16 +39,6 @@ public class SolrTransactionSynchronizationAdapterBuilder {
 	}
 
 	/**
-	 * @param collection
-	 * @return
-	 */
-	public SolrTransactionSynchronizationAdapterBuilder onCollection(String collection) {
-
-		this.collectionName = collection;
-		return this;
-	}
-
-	/**
 	 * Creates a {@link SolrTransactionSynchronizationAdapter} reacting on
 	 * {@link TransactionSynchronization#STATUS_COMMITTED} and {@link TransactionSynchronization#STATUS_ROLLED_BACK}.
 	 * 
@@ -59,9 +47,9 @@ public class SolrTransactionSynchronizationAdapterBuilder {
 	public SolrTransactionSynchronizationAdapter withDefaultBehaviour() {
 
 		this.adapter.registerCompletionDelegate(TransactionSynchronization.STATUS_COMMITTED,
-				new SolrTransactionSynchronizationAdapter.CommitTransaction(this.collectionName));
+				new SolrTransactionSynchronizationAdapter.CommitTransaction());
 		this.adapter.registerCompletionDelegate(TransactionSynchronization.STATUS_ROLLED_BACK,
-				new SolrTransactionSynchronizationAdapter.RollbackTransaction(this.collectionName));
+				new SolrTransactionSynchronizationAdapter.RollbackTransaction());
 
 		return this.adapter;
 	}

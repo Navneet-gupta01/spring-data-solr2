@@ -93,7 +93,5 @@ public @interface Query {
 	 * @since 1.2
 	 */
 	boolean delete() default false;
-	
-	String rqqValue() default "";
 
 }

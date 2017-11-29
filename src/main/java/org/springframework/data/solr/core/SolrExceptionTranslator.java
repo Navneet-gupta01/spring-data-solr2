@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.data.solr.core;
 import java.net.ConnectException;
 
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.springframework.dao.DataAccessException;
@@ -33,7 +32,7 @@ import org.springframework.util.ClassUtils;
  * Implementation of {@link org.springframework.dao.support.PersistenceExceptionTranslator} capable of translating
  * {@link org.apache.solr.client.solrj.SolrServerException} instances to Spring's
  * {@link org.springframework.dao.DataAccessException} hierarchy.
- *
+ * 
  * @author Christoph Strobl
  */
 public class SolrExceptionTranslator implements PersistenceExceptionTranslator {
@@ -46,7 +45,6 @@ public class SolrExceptionTranslator implements PersistenceExceptionTranslator {
 		}
 
 		if (ex.getCause() instanceof SolrServerException) {
-
 			SolrServerException solrServerException = (SolrServerException) ex.getCause();
 			if (solrServerException.getCause() instanceof SolrException) {
 				SolrException solrException = (SolrException) solrServerException.getCause();
@@ -79,11 +77,6 @@ public class SolrExceptionTranslator implements PersistenceExceptionTranslator {
 						solrServerException.getCause());
 			}
 		}
-
-		if (ex instanceof RemoteSolrException) {
-			return new DataAccessResourceFailureException(ex.getMessage(), ex);
-		}
-
 		return null;
 	}
 }

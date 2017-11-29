@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.data.geo.Metrics;
-import org.springframework.util.Assert;
 
 /**
  * @author Christoph Strobl
@@ -36,7 +35,9 @@ public final class GeoConverters {
 
 		@Override
 		public String convert(org.springframework.data.geo.Point source) {
-
+			if (source == null) {
+				return null;
+			}
 			if (source instanceof Point) {
 				return Point3DToStringConverter.INSTANCE.convert((Point) source);
 			}
@@ -61,6 +62,9 @@ public final class GeoConverters {
 
 		@Override
 		public org.springframework.data.geo.Point convert(String source) {
+			if (source == null) {
+				return null;
+			}
 
 			String[] coordinates = source.split(",");
 			return new org.springframework.data.geo.Point(Double.parseDouble(coordinates[0]),
@@ -78,9 +82,9 @@ public final class GeoConverters {
 
 		@Override
 		public String convert(org.springframework.data.geo.Distance source) {
-
-			Assert.notNull(source, "Source must not be null!");
-
+			if (source == null) {
+				return null;
+			}
 			double value = source.getValue();
 			if (source.getMetric() == Metrics.MILES) {
 				value = source.getValue() * 1.609344D;
@@ -99,9 +103,9 @@ public final class GeoConverters {
 
 		@Override
 		public String convert(org.springframework.data.geo.Point source) {
-
-			Assert.notNull(source, "Source must not be null!");
-
+			if (source == null) {
+				return null;
+			}
 			String formattedString = StringUtils.stripEnd(String.format(java.util.Locale.ENGLISH, "%f", source.getX()), "0")
 					+ "," + StringUtils.stripEnd(String.format(java.util.Locale.ENGLISH, "%f", source.getY()), "0");
 

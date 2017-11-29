@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.solr.common.params.HighlightParams;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -33,11 +32,17 @@ import org.springframework.util.Assert;
  */
 public class HighlightOptions {
 
-	public static final Field ALL_FIELDS = () -> Criteria.WILDCARD;
+	public static final Field ALL_FIELDS = new Field() {
 
-	private final ParameterHolder<HighlightParameter> parameterHolder = new ParameterHolder<>();
-	private @Nullable FilterQuery query;
-	private final List<Field> fields = new ArrayList<>(1);
+		@Override
+		public String getName() {
+			return Criteria.WILDCARD;
+		}
+	};
+
+	private final ParameterHolder<HighlightParameter> parameterHolder = new ParameterHolder<HighlightParameter>();
+	private FilterQuery query;
+	private final List<Field> fields = new ArrayList<Field>(1);
 
 	/**
 	 * Add field to highlight
@@ -95,7 +100,6 @@ public class HighlightOptions {
 	/**
 	 * @return null if not set
 	 */
-	@Nullable
 	public FilterQuery getQuery() {
 		return this.query;
 	}
@@ -113,7 +117,6 @@ public class HighlightOptions {
 	/**
 	 * @return null if not set
 	 */
-	@Nullable
 	public Integer getFragsize() {
 		return this.parameterHolder.getParameterValue(HighlightParams.FRAGSIZE);
 	}
@@ -131,7 +134,6 @@ public class HighlightOptions {
 	/**
 	 * @return null if not set
 	 */
-	@Nullable
 	public String getFormatter() {
 		return this.parameterHolder.getParameterValue(HighlightParams.FORMATTER);
 	}
@@ -149,7 +151,6 @@ public class HighlightOptions {
 	/**
 	 * @return null if not set
 	 */
-	@Nullable
 	public Integer getNrSnipplets() {
 		return this.parameterHolder.getParameterValue(HighlightParams.SNIPPETS);
 	}
@@ -177,7 +178,6 @@ public class HighlightOptions {
 	/**
 	 * @return
 	 */
-	@Nullable
 	public String getSimplePrefix() {
 		return this.parameterHolder.getParameterValue(HighlightParams.SIMPLE_PRE);
 	}
@@ -195,7 +195,6 @@ public class HighlightOptions {
 	/**
 	 * @return
 	 */
-	@Nullable
 	public String getSimplePostfix() {
 		return this.parameterHolder.getParameterValue(HighlightParams.SIMPLE_POST);
 	}
@@ -243,7 +242,6 @@ public class HighlightOptions {
 	 * @param parameterName
 	 * @return null if not present
 	 */
-	@Nullable
 	public <S> S getHighlightParameterValue(String parameterName) {
 		return this.parameterHolder.getParameterValue(parameterName);
 	}
@@ -255,7 +253,7 @@ public class HighlightOptions {
 	 */
 	public Collection<FieldWithHighlightParameters> getFieldsWithHighlightParameters() {
 
-		List<FieldWithHighlightParameters> result = new ArrayList<>();
+		List<FieldWithHighlightParameters> result = new ArrayList<FieldWithHighlightParameters>();
 		for (Field candidate : fields) {
 
 			if (candidate instanceof FieldWithHighlightParameters) {
@@ -310,13 +308,14 @@ public class HighlightOptions {
 		/**
 		 * @return null if not set
 		 */
-		@Nullable
 		public Integer getNrSnipplets() {
 			return getQueryParameterValue(HighlightParams.SNIPPETS);
 		}
 
 		/**
 		 * set fragsize {@code hl.fragsize}.
+		 * 
+		 * @param fragsize
 		 */
 		public FieldWithHighlightParameters setNrSnipplets(Integer nrSnipplets) {
 			addHighlightParameter(HighlightParams.SNIPPETS, nrSnipplets);
@@ -326,7 +325,6 @@ public class HighlightOptions {
 		/**
 		 * @return null if not set
 		 */
-		@Nullable
 		public Integer getFragsize() {
 			return getQueryParameterValue(HighlightParams.FRAGSIZE);
 		}
@@ -344,13 +342,14 @@ public class HighlightOptions {
 		/**
 		 * @return null if not set
 		 */
-		@Nullable
 		public Boolean isMergeContigous() {
 			return getQueryParameterValue(HighlightParams.MERGE_CONTIGUOUS_FRAGMENTS);
 		}
 
 		/**
 		 * set fragsize {@code f.&lt;fieldname&gt;.hl.fragsize}.
+		 * 
+		 * @param fragsize
 		 */
 		public FieldWithHighlightParameters setMergeContigous(Boolean mergeContigous) {
 			addHighlightParameter(HighlightParams.MERGE_CONTIGUOUS_FRAGMENTS, mergeContigous);
@@ -360,13 +359,14 @@ public class HighlightOptions {
 		/**
 		 * @return null if not set
 		 */
-		@Nullable
 		public String getFormatter() {
 			return getQueryParameterValue(HighlightParams.FORMATTER);
 		}
 
 		/**
 		 * set fragsize {@code f.&lt;formatter&gt;.hl.fragsize}.
+		 * 
+		 * @param fragsize
 		 */
 		public FieldWithHighlightParameters setFormatter(String formatter) {
 			addHighlightParameter(HighlightParams.FORMATTER, formatter);

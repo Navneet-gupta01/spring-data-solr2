@@ -15,12 +15,12 @@
  */
 package org.springframework.data.solr.repository.query;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.solr.common.params.HighlightParams;
 import org.hamcrest.collection.IsEmptyIterable;
@@ -30,9 +30,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -69,7 +70,7 @@ import org.springframework.data.solr.repository.support.MappingSolrEntityInforma
  * @author Francisco Spaeth
  * @author Oliver Gierke
  */
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SolrQueryTests {
 
 	private @Mock SolrOperations solrOperationsMock;
@@ -88,8 +89,8 @@ public class SolrQueryTests {
 		solrConverter = new MappingSolrConverter(mappingContext);
 		entityInformationCreator = new SolrEntityInformationCreatorImpl();
 		Mockito.when(persitentEntityMock.getType()).thenReturn(ProductBean.class);
-		Mockito.when(solrOperationsMock.execute(Mockito.any(SolrCallback.class)))
-				.thenReturn(new PageImpl<>(Collections.<ProductBean> emptyList()));
+		Mockito.when(solrOperationsMock.execute(Matchers.any(SolrCallback.class)))
+				.thenReturn(new PageImpl<ProductBean>(Collections.<ProductBean> emptyList()));
 		Mockito.when(solrOperationsMock.getConverter()).thenReturn(solrConverter);
 	}
 
@@ -106,8 +107,8 @@ public class SolrQueryTests {
 
 		createQueryForMethod("findAndApplyHighlighting", Pageable.class).execute(new Object[] { new PageRequest(0, 10) });
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForHighlightPage(Mockito.eq("collection-1"),
-				captor.capture(), (Class<ProductBean>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForHighlightPage(captor.capture(),
+				(Class<ProductBean>) Matchers.any());
 
 		HighlightOptions capturedOptions = captor.getValue().getHighlightOptions();
 		Assert.assertNotNull(capturedOptions);
@@ -121,8 +122,8 @@ public class SolrQueryTests {
 		createQueryForMethod("findAndApplyHighlightingAllParameters", Pageable.class)
 				.execute(new Object[] { new PageRequest(0, 10) });
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForHighlightPage(Mockito.eq("collection-1"),
-				captor.capture(), (Class<ProductBean>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForHighlightPage(captor.capture(),
+				(Class<ProductBean>) Matchers.any());
 
 		HighlightOptions capturedOptions = captor.getValue().getHighlightOptions();
 		Assert.assertNotNull(capturedOptions);
@@ -145,8 +146,8 @@ public class SolrQueryTests {
 		createQueryForMethod("findAndApplyHighlightingWithParametrizedHighlightQuery", String.class, Pageable.class)
 				.execute(new Object[] { "spring", new PageRequest(0, 10) });
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForHighlightPage(Mockito.eq("collection-1"),
-				captor.capture(), (Class<ProductBean>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForHighlightPage(captor.capture(),
+				(Class<ProductBean>) Matchers.any());
 
 		HighlightOptions capturedOptions = captor.getValue().getHighlightOptions();
 		Assert.assertEquals("name:*spring*",
@@ -161,8 +162,8 @@ public class SolrQueryTests {
 		createQueryForMethod("findAndApplyHighlightingWithNonDefaultFormatter", Pageable.class)
 				.execute(new Object[] { new PageRequest(0, 10) });
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForHighlightPage(Mockito.eq("collection-1"),
-				captor.capture(), (Class<ProductBean>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForHighlightPage(captor.capture(),
+				(Class<ProductBean>) Matchers.any());
 
 		HighlightOptions capturedOptions = captor.getValue().getHighlightOptions();
 		Assert.assertNotNull(capturedOptions);
@@ -180,14 +181,13 @@ public class SolrQueryTests {
 		Method method = Repo1.class.getMethod("findTop5ByName", String.class, Pageable.class);
 		SolrQueryMethod sqm = createSolrQueryMethodFrom(method);
 
-		PartTreeSolrQuery ptsq = new PartTreeSolrQuery("collection-1", sqm, this.solrOperationsMock);
+		PartTreeSolrQuery ptsq = new PartTreeSolrQuery(sqm, this.solrOperationsMock);
 
 		ptsq.execute(new Object[] { "foo", new PageRequest(0, 10) });
 
 		ArgumentCaptor<Query> captor = ArgumentCaptor.forClass(Query.class);
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(Mockito.eq("collection-1"), captor.capture(),
-				(Class<?>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(captor.capture(), (Class<?>) Matchers.any());
 
 		Assert.assertThat(captor.getValue().getPageRequest().getPageNumber(), IsEqual.equalTo(0));
 		Assert.assertThat(captor.getValue().getPageRequest().getPageSize(), IsEqual.equalTo(5));
@@ -199,14 +199,13 @@ public class SolrQueryTests {
 		Method method = Repo1.class.getMethod("findTop5ByName", String.class, Pageable.class);
 		SolrQueryMethod sqm = createSolrQueryMethodFrom(method);
 
-		PartTreeSolrQuery ptsq = new PartTreeSolrQuery("collection-1", sqm, this.solrOperationsMock);
+		PartTreeSolrQuery ptsq = new PartTreeSolrQuery(sqm, this.solrOperationsMock);
 
 		ptsq.execute(new Object[] { "foo", new PageRequest(1, 2) });
 
 		ArgumentCaptor<Query> captor = ArgumentCaptor.forClass(Query.class);
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(Mockito.eq("collection-1"), captor.capture(),
-				(Class<?>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(captor.capture(), (Class<?>) Matchers.any());
 
 		Assert.assertThat(captor.getValue().getPageRequest().getPageNumber(), IsEqual.equalTo(1));
 		Assert.assertThat(captor.getValue().getPageRequest().getPageSize(), IsEqual.equalTo(2));
@@ -222,8 +221,8 @@ public class SolrQueryTests {
 
 		ptsq.execute(new Object[] { "foo", new PageRequest(2, 5) });
 
-		Mockito.verify(solrOperationsMock, Mockito.never()).queryForPage(Mockito.eq("collection-1"),
-				Mockito.any(Query.class), (Class<?>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.never()).queryForPage(Matchers.any(Query.class),
+				(Class<?>) Matchers.any());
 	}
 
 	@Test // DATASOLR-186
@@ -232,8 +231,8 @@ public class SolrQueryTests {
 		createQueryForMethod("findByName", String.class, Pageable.class)
 				.execute(new Object[] { "sliceme", new PageRequest(0, 10) });
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(Mockito.eq("collection-1"),
-				Mockito.any(Query.class), Mockito.<Class<ProductBean>> any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(Matchers.any(Query.class),
+				Matchers.<Class<ProductBean>> any());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -243,8 +242,8 @@ public class SolrQueryTests {
 
 		createQueryForMethod("findAndApplyStats", Pageable.class).execute(new Object[] { new PageRequest(0, 10) });
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(Mockito.eq("collection-1"), captor.capture(),
-				(Class<ProductBean>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(captor.capture(),
+				(Class<ProductBean>) Matchers.any());
 
 		StatsOptions capturedOptions = captor.getValue().getStatsOptions();
 
@@ -270,13 +269,13 @@ public class SolrQueryTests {
 		createQueryForMethod("findAndApplyStatsNonSelective", Pageable.class)
 				.execute(new Object[] { new PageRequest(0, 10) });
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(Mockito.eq("collection-1"), captor.capture(),
-				(Class<ProductBean>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(captor.capture(),
+				(Class<ProductBean>) Matchers.any());
 
 		StatsOptions capturedOptions = captor.getValue().getStatsOptions();
 
 		Assert.assertEquals(1, capturedOptions.getFields().size());
-		Assert.assertTrue(capturedOptions.getFields().containsAll(Collections.singletonList(new SimpleField("field1"))));
+		Assert.assertTrue(capturedOptions.getFields().containsAll(Arrays.asList(new SimpleField("field1"))));
 
 		Assert.assertEquals(2, capturedOptions.getFacets().size());
 		Assert.assertTrue(
@@ -292,30 +291,24 @@ public class SolrQueryTests {
 
 		createQueryForMethod("findAndApplyStatsNoFacets", Pageable.class).execute(new Object[] { new PageRequest(0, 10) });
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(Mockito.eq("collection-1"), captor.capture(),
-				(Class<ProductBean>) Mockito.any());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(captor.capture(),
+				(Class<ProductBean>) Matchers.any());
 
 		StatsOptions capturedOptions = captor.getValue().getStatsOptions();
 
 		Assert.assertEquals(1, capturedOptions.getFields().size());
-		Assert.assertTrue(capturedOptions.getFields().containsAll(Collections.singletonList(new SimpleField("field1"))));
+		Assert.assertTrue(capturedOptions.getFields().containsAll(Arrays.asList(new SimpleField("field1"))));
 
 		Assert.assertThat(capturedOptions.getFacets(), IsEmptyIterable.emptyIterable());
 		Assert.assertThat(capturedOptions.getSelectiveFacets().entrySet(), IsEmptyIterable.emptyIterable());
 	}
 
-	@Test // DATASOLR-402
-	public void singleEntityExecutionShouldUseCollectionNameWhenReturningOptional() {
-
-		createQueryForMethod("findAndReturnNotOptional").execute(new Object[] {});
-
-		Mockito.verify(solrOperationsMock).queryForObject(Mockito.eq("collection-1"), Mockito.any(), Mockito.any());
-	}
-
 	private RepositoryQuery createQueryForMethod(String methodName, Class<?>... paramTypes) {
 		try {
 			return this.createQueryForMethod(Repo1.class.getMethod(methodName, paramTypes));
-		} catch (NoSuchMethodException | SecurityException e) {
+		} catch (NoSuchMethodException e) {
+			throw new IllegalArgumentException(e.getMessage(), e);
+		} catch (SecurityException e) {
 			throw new IllegalArgumentException(e.getMessage(), e);
 		}
 	}
@@ -352,7 +345,7 @@ public class SolrQueryTests {
 		Slice<ProductBean> findByName(String name, Pageable page);
 
 		@Stats(value = "field1", facets = { "field2", "field3" }, //
-				selective = @SelectiveStats(field = "field4", facets = { "field4_1", "field4_2" }))
+				selective = @SelectiveStats(field = "field4", facets = { "field4_1", "field4_2" }) )
 		Page<ProductBean> findAndApplyStats(Pageable page);
 
 		@Stats(value = "field1", facets = { "field2", "field3" })
@@ -361,14 +354,13 @@ public class SolrQueryTests {
 		@Stats(value = "field1")
 		Page<ProductBean> findAndApplyStatsNoFacets(Pageable page);
 
-		ProductBean findAndReturnNotOptional();
 	}
 
 	private class SolrEntityInformationCreatorImpl implements SolrEntityInformationCreator {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T, ID> SolrEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
+		public <T, ID extends Serializable> SolrEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 			return (SolrEntityInformation<T, ID>) new SolrEntityInformationImpl(persitentEntityMock);
 		}
 	}
@@ -394,7 +386,7 @@ public class SolrQueryTests {
 	private class SolrQueryImpl extends AbstractSolrQuery {
 
 		public SolrQueryImpl(SolrOperations solrOperations, SolrQueryMethod solrQueryMethod) {
-			super("collection-1", solrOperations, solrQueryMethod);
+			super(solrOperations, solrQueryMethod);
 		}
 
 		@Override

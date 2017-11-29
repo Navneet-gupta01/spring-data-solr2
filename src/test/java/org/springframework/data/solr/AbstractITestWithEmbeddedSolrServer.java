@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,15 @@ import org.springframework.data.solr.test.util.EmbeddedSolrServer.ClientCache;
  */
 public abstract class AbstractITestWithEmbeddedSolrServer {
 
-	protected static final String COLLECTION_NAME = "collection1";
-	protected static final String DEFAULT_BEAN_ID = "1";
+	protected static String DEFAULT_BEAN_ID = "1";
 
 	public static @ClassRule org.springframework.data.solr.test.util.EmbeddedSolrServer server = org.springframework.data.solr.test.util.EmbeddedSolrServer
 			.configure(new ClassPathResource("static-schema"), ClientCache.ENABLED);
 
 	public void cleanDataInSolr() throws SolrServerException, IOException {
 
-		server.getSolrClient(COLLECTION_NAME).deleteByQuery("*:*");
-		server.getSolrClient(COLLECTION_NAME).commit();
+		server.getSolrClient("collection1").deleteByQuery("*:*");
+		server.getSolrClient("collection1").commit();
 	}
 
 	public ExampleSolrBean createDefaultExampleBean() {
@@ -54,7 +53,7 @@ public abstract class AbstractITestWithEmbeddedSolrServer {
 	}
 
 	public List<ExampleSolrBean> createBeansWithIdAndPrefix(int nrObjectsToCreate, String idPrefix) {
-		ArrayList<ExampleSolrBean> list = new ArrayList<>(nrObjectsToCreate);
+		ArrayList<ExampleSolrBean> list = new ArrayList<ExampleSolrBean>(nrObjectsToCreate);
 		for (int i = 1; i <= nrObjectsToCreate; i++) {
 			list.add(createExampleBeanWithId(idPrefix != null ? (idPrefix + Integer.toString(i)) : Integer.toString(i)));
 		}

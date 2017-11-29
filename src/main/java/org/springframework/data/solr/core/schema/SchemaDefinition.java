@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 package org.springframework.data.solr.core.schema;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,9 +23,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author Christoph Strobl
@@ -36,21 +35,20 @@ import org.springframework.util.ObjectUtils;
  */
 public class SchemaDefinition {
 
-	private @Nullable String collectionName;
-	private List<FieldDefinition> fields = new ArrayList<>();
-	private List<CopyFieldDefinition> copyFields = new ArrayList<>();
-	private @Nullable String name;
-	private @Nullable Double version;
-	private @Nullable String uniqueKey;
+	private String collectionName;
+	private List<FieldDefinition> fields;
+	private List<CopyFieldDefinition> copyFields;
+	private String name;
+	private Double version;
+	private String uniqueKey;
 
 	public SchemaDefinition() {}
 
 	public SchemaDefinition(String collectionName) {
 		this.collectionName = collectionName;
-		this.fields = new ArrayList<>();
+		this.fields = new ArrayList<FieldDefinition>();
 	}
 
-	@Nullable
 	public String getCollectionName() {
 		return collectionName;
 	}
@@ -59,11 +57,10 @@ public class SchemaDefinition {
 		return fields;
 	}
 
-	public void setFields(@Nullable List<FieldDefinition> fields) {
-		this.fields = fields != null ? fields : new ArrayList<>();
+	public void setFields(List<FieldDefinition> fields) {
+		this.fields = fields != null ? fields : new ArrayList<FieldDefinition>();
 	}
 
-	@Nullable
 	public String getName() {
 		return name;
 	}
@@ -72,7 +69,6 @@ public class SchemaDefinition {
 		this.name = name;
 	}
 
-	@Nullable
 	public Double getVersion() {
 		return version;
 	}
@@ -81,7 +77,6 @@ public class SchemaDefinition {
 		this.version = version;
 	}
 
-	@Nullable
 	public String getUniqueKey() {
 		return uniqueKey;
 	}
@@ -94,7 +89,6 @@ public class SchemaDefinition {
 		return getFieldDefinition(name) != null;
 	}
 
-	@Nullable
 	public FieldDefinition getFieldDefinition(String name) {
 
 		if (CollectionUtils.isEmpty(this.fields)) {
@@ -111,10 +105,18 @@ public class SchemaDefinition {
 	}
 
 	public void addFieldDefinition(FieldDefinition fieldDef) {
+
+		if (this.fields == null) {
+			this.fields = new ArrayList<FieldDefinition>();
+		}
 		this.fields.add(fieldDef);
 	}
 
 	public void addCopyField(CopyFieldDefinition copyField) {
+
+		if (this.copyFields == null) {
+			this.copyFields = new ArrayList<CopyFieldDefinition>();
+		}
 		this.copyFields.add(copyField);
 	}
 
@@ -130,7 +132,7 @@ public class SchemaDefinition {
 	 * @author Christoph Strobl
 	 * @since 1.3
 	 */
-	public interface SchemaField {}
+	public static interface SchemaField {}
 
 	/**
 	 * @author Christoph Strobl
@@ -140,14 +142,14 @@ public class SchemaDefinition {
 	@NoArgsConstructor
 	public static class FieldDefinition implements SchemaField {
 
-		private @Nullable String name;
-		private @Nullable String type;
+		private String name;
+		private String type;
 		private boolean stored;
 		private boolean indexed;
-		private @Nullable Object defaultValue;
-		private List<String> copyFields = Collections.emptyList();
-		private List<Filter> filters = Collections.emptyList();
-		private List<Tokenizer> tokenizers = Collections.emptyList();
+		private Object defaultValue;
+		private List<String> copyFields;
+		private List<Filter> filters;
+		private List<Tokenizer> tokenizers;
 		private boolean multiValued;
 		private boolean required;
 
@@ -156,7 +158,7 @@ public class SchemaDefinition {
 		}
 
 		public void setCopyFields(Collection<String> copyFields) {
-			this.copyFields = new ArrayList<>(copyFields);
+			this.copyFields = new ArrayList<String>(copyFields);
 		}
 
 		/**
@@ -165,7 +167,7 @@ public class SchemaDefinition {
 		 */
 		public Map<String, Object> asMap() {
 
-			Map<String, Object> values = new LinkedHashMap<>();
+			Map<String, Object> values = new LinkedHashMap<String, Object>();
 			addIfNotNull("name", name, values);
 			addIfNotNull("type", type, values);
 			addIfNotNull("indexed", indexed, values);
@@ -176,7 +178,7 @@ public class SchemaDefinition {
 			return values;
 		}
 
-		private void addIfNotNull(String key, @Nullable Object value, Map<String, Object> dest) {
+		private void addIfNotNull(String key, Object value, Map<String, Object> dest) {
 			if (value != null) {
 				dest.put(key, value);
 			}
@@ -203,7 +205,7 @@ public class SchemaDefinition {
 			return fd;
 		}
 
-		private static <T> T valueFromMap(String key, Map<String, Object> source, @Nullable T defaultValue) {
+		private static <T> T valueFromMap(String key, Map<String, Object> source, T defaultValue) {
 
 			if (source.containsKey(key)) {
 				return (T) source.get(key);
@@ -277,8 +279,6 @@ public class SchemaDefinition {
 		public static Builder newFieldDefinition() {
 			return new Builder();
 		}
-		
-		
 
 	}
 
@@ -289,8 +289,8 @@ public class SchemaDefinition {
 	@Data
 	public static class CopyFieldDefinition implements SchemaField {
 
-		@Nullable String source;
-		List<String> destination = Collections.emptyList();
+		String source;
+		List<String> destination;
 
 		public static CopyFieldDefinition fromMap(Map<String, Object> fieldValueMap) {
 
@@ -299,11 +299,9 @@ public class SchemaDefinition {
 
 			Object dest = fieldValueMap.get("dest");
 			if (dest instanceof Collection) {
-				cfd.destination = new ArrayList<>((Collection<String>) dest);
+				cfd.destination = new ArrayList<String>((Collection<String>) dest);
 			} else if (fieldValueMap.get("dest") instanceof String) {
-				cfd.destination = Collections.singletonList(dest.toString());
-			} else {
-				cfd.destination = Collections.emptyList();
+				cfd.destination = Collections.<String> singletonList(dest.toString());
 			}
 
 			return cfd;
@@ -339,7 +337,7 @@ public class SchemaDefinition {
 				if (cf.getDestination() == null) {
 					cf.setDestination(Arrays.asList(destinations));
 				} else {
-					ArrayList<String> values = new ArrayList<>(cf.getDestination());
+					ArrayList<String> values = new ArrayList<String>(cf.getDestination());
 					CollectionUtils.mergeArrayIntoCollection(destinations, values);
 					cf.setDestination(values);
 				}
@@ -358,10 +356,10 @@ public class SchemaDefinition {
 	 */
 	public static class Filter {
 
-		@Nullable String clazz;
-		@Nullable String pattern;
-		@Nullable String replace;
-		@Nullable String replacement;
+		String clazz;
+		String pattern;
+		String replace;
+		String replacement;
 	}
 
 	/**
@@ -370,7 +368,7 @@ public class SchemaDefinition {
 	 */
 	public static class Tokenizer {
 
-		@Nullable String clazz;
+		String clazz;
 	}
 
 	public static class FieldDefinitionBuilder {

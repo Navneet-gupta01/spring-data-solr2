@@ -5,7 +5,7 @@
   },
   "schema": {
     "name": "example",
-    "version": 1.6,
+    "version": 1.5,
     "uniqueKey": "id",
     "fieldTypes": [
       {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ public class GeoConverterTests {
 
 	public static class DistanceConverterTests {
 
-		@Test(expected = IllegalArgumentException.class)
+		@Test
 		public void testConvertDistanceToStringWithNull() {
-			GeoConverters.DistanceToStringConverter.INSTANCE.convert(null);
+			Assert.assertNull(GeoConverters.DistanceToStringConverter.INSTANCE.convert(null));
 		}
 
 		@Test
@@ -52,18 +52,17 @@ public class GeoConverterTests {
 					GeoConverters.DistanceToStringConverter.INSTANCE.convert(new Distance(1, Metrics.MILES)));
 		}
 
-		@Test // DATASOLR-31, DATASOLR-408
-		public void testConvertDistanceWithNeutralUnitToString() {
-			Assert.assertEquals("1.0",
-					GeoConverters.DistanceToStringConverter.INSTANCE.convert(new Distance(1, Metrics.NEUTRAL)));
+		@Test
+		public void testConvertDistanceWithNullUnitToString() {
+			Assert.assertEquals("1.0", GeoConverters.DistanceToStringConverter.INSTANCE.convert(new Distance(1, null)));
 		}
 	}
 
 	public static class PointConverterTests {
 
-		@Test(expected = IllegalArgumentException.class)
+		@Test
 		public void testConvertPointToStringWithNull() {
-			GeoConverters.Point3DToStringConverter.INSTANCE.convert(null);
+			Assert.assertNull(GeoConverters.Point3DToStringConverter.INSTANCE.convert(null));
 		}
 
 		@Test

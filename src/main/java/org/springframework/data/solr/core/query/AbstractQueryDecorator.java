@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * General purpose {@link Query} abstract decorator.
@@ -44,7 +44,6 @@ public abstract class AbstractQueryDecorator implements Query {
 		return this.query.addCriteria(criteria);
 	}
 
-	@Nullable
 	@Override
 	public Criteria getCriteria() {
 		return this.query.getCriteria();
@@ -111,22 +110,14 @@ public abstract class AbstractQueryDecorator implements Query {
 		return this.query.addSort(sort);
 	}
 
-	@Nullable
 	@Override
 	public Sort getSort() {
 		return this.query.getSort();
 	}
 
-	@Nullable
 	@Override
 	public Integer getTimeAllowed() {
 		return this.query.getTimeAllowed();
-	}
-	
-	@Nullable
-	@Override
-	public String getRqqValue() {
-		return this.query.getRqqValue();
 	}
 
 	@Override
@@ -160,13 +151,8 @@ public abstract class AbstractQueryDecorator implements Query {
 	}
 
 	@Override
-	public <T extends Query> T setOffset(Long offset) {
+	public <T extends Query> T setOffset(Integer offset) {
 		return this.query.setOffset(offset);
-	}
-	
-	@Override
-	public <T extends Query> T setReRank(String rqqValue) {
-		return this.query.setReRank(rqqValue);
 	}
 
 	@Override
@@ -175,7 +161,7 @@ public abstract class AbstractQueryDecorator implements Query {
 	}
 
 	@Override
-	public Long getOffset() {
+	public Integer getOffset() {
 		return this.query.getOffset();
 	}
 
@@ -228,6 +214,16 @@ public abstract class AbstractQueryDecorator implements Query {
 	@Override
 	public SpellcheckOptions getSpellcheckOptions() {
 		return query.getSpellcheckOptions();
+	}
+
+	/**
+	 * Get the {@link Class} of the originally decorated query.
+	 *
+	 * @return never {@literal null}.
+	 * @since 2.1
+	 */
+	public Class<?> getQueryType() {
+		return ClassUtils.getUserClass(query.getClass());
 	}
 
 }

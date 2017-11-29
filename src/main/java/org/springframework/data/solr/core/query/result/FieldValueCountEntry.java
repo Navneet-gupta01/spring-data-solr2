@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,23 @@ package org.springframework.data.solr.core.query.result;
 
 import org.springframework.data.solr.core.query.Field;
 import org.springframework.data.solr.core.query.SimpleField;
-import org.springframework.lang.Nullable;
 
 /**
  * @author Christoph Strobl
+ * 
  */
 public class FieldValueCountEntry extends ValueCountEntry {
 
-	private @Nullable Field field;
+	private Field field;
 
 	public FieldValueCountEntry(String value, long valueCount) {
 		super(value, valueCount);
 	}
 
-	@Nullable
 	public Field getKey() {
 		return getField();
 	}
 
-	@Nullable
 	public Field getField() {
 		return this.field;
 	}

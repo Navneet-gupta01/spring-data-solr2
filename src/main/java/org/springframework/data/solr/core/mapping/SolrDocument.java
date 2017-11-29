@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.apache.solr.common.params.SolrParams;
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.data.annotation.Persistent;
 
 /**
@@ -38,10 +36,7 @@ public @interface SolrDocument {
 	 * Defines the {@literal collectionname} the document is persisted in.
 	 * 
 	 * @return
-	 * @deprecated since 3.0. Please use {@link #collection()}.
 	 */
-	@Deprecated
-	@AliasFor(attribute = "collection")
 	String solrCoreName() default "";
 
 	/**
@@ -51,12 +46,5 @@ public @interface SolrDocument {
 	 * @since 1.2
 	 */
 	float boost() default Float.NaN;
-
-	/**
-	 * @return
-	 * @since 3.0
-	 */
-	@AliasFor(attribute = "solrCoreName")
-	String collection() default "";
 
 }

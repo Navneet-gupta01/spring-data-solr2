@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,23 +34,21 @@ import org.springframework.util.Assert;
  */
 public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 
-	private List<Field> projectionOnFields = new ArrayList<>(0);
-	private List<FilterQuery> filterQueries = new ArrayList<>(0);
+	private List<Field> projectionOnFields = new ArrayList<Field>(0);
+	private List<FilterQuery> filterQueries = new ArrayList<FilterQuery>(0);;
 
-	private @Nullable Long offset = null;
-	private @Nullable Integer rows = null;
+	private Integer offset = null;
+	private Integer rows = null;
 
-	private Sort sort = Sort.unsorted();
+	private Sort sort;
 
-	private @Nullable Operator defaultOperator;
-	private @Nullable Integer timeAllowed;
-	private @Nullable String rqqValue;
-	
-	private @Nullable String defType;
+	private Operator defaultOperator;
+	private Integer timeAllowed;
+	private String defType;
 
-	private @Nullable GroupOptions groupOptions;
-	private @Nullable StatsOptions statsOptions;
-	private @Nullable SpellcheckOptions spellcheckOptions;
+	private GroupOptions groupOptions;
+	private StatsOptions statsOptions;
+	private SpellcheckOptions spellcheckOptions;
 
 	public SimpleQuery() {}
 
@@ -59,7 +56,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	 * @param criteria
 	 */
 	public SimpleQuery(Criteria criteria) {
-		this(criteria, Pageable.unpaged());
+		this(criteria, null);
 	}
 
 	/**
@@ -74,10 +71,10 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	 * @param criteria
 	 * @param pageable
 	 */
-	public SimpleQuery(Criteria criteria, @Nullable Pageable pageable) {
+	public SimpleQuery(Criteria criteria, Pageable pageable) {
 		super(criteria);
 
-		if (pageable != null && !pageable.isUnpaged()) {
+		if (pageable != null) {
 			this.offset = pageable.getOffset();
 			this.rows = pageable.getPageSize();
 			this.addSort(pageable.getSort());
@@ -93,13 +90,11 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 		this(new SimpleStringCriteria(queryString), pageable);
 	}
 
-	@Nullable
 	public static final Query fromQuery(Query source) {
 		return fromQuery(source, new SimpleQuery());
 	}
 
-	@Nullable
-	public static <T extends SimpleQuery> T fromQuery(@Nullable Query source, @Nullable T destination) {
+	public static <T extends SimpleQuery> T fromQuery(Query source, T destination) {
 		if (source == null || destination == null) {
 			return null;
 		}
@@ -188,7 +183,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Query> T setOffset(Long offset) {
+	public <T extends Query> T setOffset(Integer offset) {
 		this.offset = offset;
 		return (T) this;
 	}
@@ -230,7 +225,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public final <T extends Query> T addSort(@Nullable Sort sort) {
+	public final <T extends Query> T addSort(Sort sort) {
 		if (sort == null) {
 			return (T) this;
 		}
@@ -253,22 +248,20 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	public Pageable getPageRequest() {
 
 		if (this.rows == null && this.offset == null) {
-			return Pageable.unpaged();
+			return null;
 		}
 
 		int rows = this.rows != null ? this.rows : DEFAULT_PAGE_SIZE;
-		long offset = this.offset != null ? this.offset : 0;
+		int offset = this.offset != null ? this.offset : 0;
 
-		return new SolrPageRequest(rows != 0 ? (int) (offset / rows) : 0, rows, this.sort);
+		return new SolrPageRequest(rows != 0 ? offset / rows : 0, rows, this.sort);
 	}
 
-	@Nullable
 	@Override
-	public Long getOffset() {
+	public Integer getOffset() {
 		return this.offset;
 	}
 
-	@Nullable
 	@Override
 	public Integer getRows() {
 		return this.rows;
@@ -302,7 +295,6 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 		return (T) this;
 	}
 
-	@Nullable
 	@Override
 	public Integer getTimeAllowed() {
 		return this.timeAllowed;
@@ -315,7 +307,6 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 		return (T) this;
 	}
 
-	@Nullable
 	@Override
 	public GroupOptions getGroupOptions() {
 		return groupOptions;
@@ -325,7 +316,6 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	 * (non-Javadoc)
 	 * @see org.springframework.data.solr.core.query.Query#getStatsOptions()
 	 */
-	@Nullable
 	@Override
 	public StatsOptions getStatsOptions() {
 		return statsOptions;
@@ -391,21 +381,8 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	 * (non-Javadoc)
 	 * @see org.springframework.data.solr.core.query.Query#getSpellcheckOptions()
 	 */
-	@Nullable
 	@Override
 	public SpellcheckOptions getSpellcheckOptions() {
 		return this.spellcheckOptions;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends Query> T setReRank(String rqqValue) {
-		this.rqqValue=rqqValue;
-		return (T) this;
-	}
-
-	@Override
-	public String getRqqValue() {
-		return this.rqqValue;
 	}
 }

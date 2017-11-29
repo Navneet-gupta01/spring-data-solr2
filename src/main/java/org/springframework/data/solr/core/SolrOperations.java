@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
  */
 package org.springframework.data.solr.core;
 
-import java.time.Duration;
+import java.io.Serializable;
 import java.util.Collection;
-import java.util.Optional;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
@@ -43,7 +42,7 @@ import org.springframework.data.solr.core.schema.SchemaOperations;
 
 /**
  * Interface that specifies a basic set of Solr operations.
- * 
+ *
  * @author Christoph Strobl
  * @author Joachim Uhrlass
  * @author Francisco Spaeth
@@ -55,435 +54,749 @@ public interface SolrOperations {
 	/**
 	 * Get the underlying SolrClient instance
 	 *
-	 * @return the {@link SolrClient} in use. Never {@literal null}.
+	 * @return
 	 */
 	SolrClient getSolrClient();
 
 	/**
 	 * Execute ping against SolrClient and return duration in msec
 	 *
-	 * @return {@link SolrPingResponse} containing ping result.
-	 * @throws org.springframework.dao.DataAccessResourceFailureException if ping fails.
+	 * @return
 	 */
 	SolrPingResponse ping();
 
 	/**
-	 * Execute ping against SolrClient and return duration in msec
-	 *
-	 * @param collection must not be {@literal null}.
-	 * @return {@link SolrPingResponse} containing ping result.
-	 * @throws org.springframework.dao.DataAccessResourceFailureException if ping fails.
-	 * @since 3.0
-	 */
-	SolrPingResponse ping(String collection);
-
-	/**
 	 * return number of elements found by for given query
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
-	 * @return total number of documents matching given query.
-	 * @since 3.0
+	 * @return
 	 */
-	long count(String collection, SolrDataQuery query);
+	long count(SolrDataQuery query);
+
+	/**
+	 * Return number of elements found in given collection by for given query
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	long count(String collectionName, SolrDataQuery query);
 
 	/**
 	 * return number of elements found by for given query
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param method must not be {@literal null}.
-	 * @return total number of documents matching given query.
-	 * @since 3.0
+	 * @return
+	 * @since 2.0
 	 */
-	long count(String collection, SolrDataQuery query, RequestMethod method);
+	long count(SolrDataQuery query, RequestMethod method);
 
 	/**
-	 * Execute add operation against solr, which will do either insert or update.
+	 * Return number of elements found in collection by for given query.
 	 *
-	 * @param collection must not be {@literal null}.
-	 * @param obj must not be {@literal null}.
-	 * @return {@link UpdateResponse} containing update result.
-	 * @since 3.0
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.1
 	 */
-	default UpdateResponse saveBean(String collection, Object obj) {
-		return saveBean(collection, obj, Duration.ZERO);
-	}
+	long count(String collectionName, SolrDataQuery query, RequestMethod method);
 
 	/**
-	 * Execute add operation against solr, which will do either insert or update with support for commitWithin strategy.
+	 * Execute add operation against solr, which will do either insert or update
 	 *
-	 * @param collection must not be {@literal null}.
-	 * @param obj must not be {@literal null}.
-	 * @param commitWithin max time within server performs commit.
-	 * @return {@link UpdateResponse} containing update result.
+	 * @param obj
+	 * @return
 	 */
-	UpdateResponse saveBean(String collection, Object obj, Duration commitWithin);
+	UpdateResponse saveBean(Object obj);
+
+	/**
+	 * Execute add operation against specific collection, which will do either insert or update
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param obj must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	UpdateResponse saveBean(String collectionName, Object obj);
+
+	/**
+	 * Execute add operation against solr, which will do either insert or update with support for commitWithin strategy
+	 *
+	 * @param obj must not be {@literal null}.
+	 * @param commitWithinMs
+	 * @return
+	 */
+	UpdateResponse saveBean(Object obj, int commitWithinMs);
+
+	/**
+	 * Execute add operation against specific collection, which will do either insert or update with support for
+	 * commitWithin strategy.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param objectToAdd must not be {@literal null}.
+	 * @param commitWithinMs
+	 * @return
+	 * @since 2.1
+	 */
+	UpdateResponse saveBean(String collectionName, Object objectToAdd, int commitWithinMs);
 
 	/**
 	 * Add a collection of beans to solr, which will do either insert or update.
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param beans must not be {@literal null}.
-	 * @return {@link UpdateResponse} containing update result.
-	 * @since 3.0
+	 * @return
 	 */
-	default UpdateResponse saveBeans(String collection, Collection<?> beans) {
-		return saveBeans(collection, beans, Duration.ZERO);
-	}
+	UpdateResponse saveBeans(Collection<?> beans);
 
 	/**
-	 * Add a collection of beans to solr, which will do either insert or update with support for commitWithin strategy.
+	 * Add a collection of beans to specific collection, which will do either insert or update.
 	 *
-	 * @param collection must not be {@literal null}.
+	 * @param collectionName must not be {@literal null}.
 	 * @param beans must not be {@literal null}.
-	 * @param commitWithin max time within server performs commit.
-	 * @return {@link UpdateResponse} containing update result.
-	 * @since 3.0
+	 * @return
+	 * @since 2.1
 	 */
-	UpdateResponse saveBeans(String collection, Collection<?> beans, Duration commitWithin);
+	UpdateResponse saveBeans(String collectionName, Collection<?> beans);
+
+	/**
+	 * Add a collection of beans to solr, which will do either insert or update with support for commitWithin strategy
+	 *
+	 * @param beans must not be {@literal null}.
+	 * @param commitWithinMs
+	 * @return
+	 */
+	UpdateResponse saveBeans(Collection<?> beans, int commitWithinMs);
+
+	/**
+	 * Add a collection of beans to specific collection, which will do either insert or update with support for
+	 * commitWithin strategy.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param beansToAdd must not be {@literal null}.
+	 * @param commitWithinMs
+	 * @return
+	 * @since 2.1
+	 */
+	UpdateResponse saveBeans(String collectionName, Collection<?> beansToAdd, int commitWithinMs);
 
 	/**
 	 * Add a solrj input document to solr, which will do either insert or update
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param document must not be {@literal null}.
-	 * @return {@link UpdateResponse} containing update result.
+	 * @return
 	 */
-	default UpdateResponse saveDocument(String collection, SolrInputDocument document) {
-		return saveDocument(collection, document, Duration.ZERO);
-	}
+	UpdateResponse saveDocument(SolrInputDocument document);
+
+	/**
+	 * Add a solrj input document to specific collection, which will do either insert or update.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param document must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	UpdateResponse saveDocument(String collectionName, SolrInputDocument document);
 
 	/**
 	 * Add a solrj input document to solr, which will do either insert or update with support for commitWithin strategy
 	 *
 	 * @param document must not be {@literal null}.
-	 * @param commitWithin must not be {@literal null}.
-	 * @return {@link UpdateResponse} containing update result.
-	 * @since 3.0
+	 * @param commitWithinMs
+	 * @return
 	 */
-	UpdateResponse saveDocument(String collection, SolrInputDocument document, Duration commitWithin);
+	UpdateResponse saveDocument(SolrInputDocument document, int commitWithinMs);
+
+	/**
+	 * Add a solrj input document to specific collection, which will do either insert or update with support for
+	 * commitWithin strategy
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param documentToAdd must not be {@literal null}.
+	 * @param commitWithinMs
+	 * @return
+	 * @since 2.1
+	 */
+	UpdateResponse saveDocument(String collectionName, SolrInputDocument documentToAdd, int commitWithinMs);
 
 	/**
 	 * Add multiple solrj input documents to solr, which will do either insert or update
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param documents must not be {@literal null}.
-	 * @return {@link UpdateResponse} containing update result.
-	 * @since 3.0
+	 * @return
 	 */
-	default UpdateResponse saveDocuments(String collection, Collection<SolrInputDocument> documents) {
-		return saveDocuments(collection, documents, Duration.ZERO);
-	}
+	UpdateResponse saveDocuments(Collection<SolrInputDocument> documents);
+
+	/**
+	 * Add multiple solrj input documents to specific collection, which will do either insert or update.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param documents must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	UpdateResponse saveDocuments(String collectionName, Collection<SolrInputDocument> documents);
 
 	/**
 	 * Add multiple solrj input documents to solr, which will do either insert or update with support for commitWithin
-	 * strategy.
+	 * strategy
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param documents must not be {@literal null}.
-	 * @param commitWithin max time within server performs commit.
-	 * @return {@link UpdateResponse} containing update result.
-	 * @since 3.0
+	 * @return
 	 */
-	UpdateResponse saveDocuments(String collection, Collection<SolrInputDocument> documents, Duration commitWithin);
+	UpdateResponse saveDocuments(Collection<SolrInputDocument> documents, int commitWithinMs);
 
 	/**
-	 * Find and delete all objects matching the provided Query.
+	 * Add multiple solrj input documents to specific collection, which will do either insert or update with support for
+	 * commitWithin strategy.
 	 *
-	 * @param collection must not be {@literal null}.
+	 * @param collectionName must not be {@literal null}.
+	 * @param documents must not be {@literal null}.
+	 * @param commitWithinMs
+	 * @return
+	 * @since 2.1
+	 */
+	UpdateResponse saveDocuments(String collectionName, Collection<SolrInputDocument> documents, int commitWithinMs);
+
+	/**
+	 * Find and delete all objects matching the provided Query
+	 *
 	 * @param query must not be {@literal null}.
-	 * @return {@link UpdateResponse} containing delete result.
-	 * @since 3.0
+	 * @return
 	 */
-	UpdateResponse delete(String collection, SolrDataQuery query);
+	UpdateResponse delete(SolrDataQuery query);
 
 	/**
-	 * Detele the one object with provided id.
+	 * Find and delete all objects matching the provided Query in specific collection.
 	 *
-	 * @param collection must not be {@literal null}.
-	 * @param id must not be {@literal null}.
-	 * @return {@link UpdateResponse} containing delete result.
-	 * @since 3.0
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @return
+	 * @since 2.1
 	 */
-	UpdateResponse deleteByIds(String collection, String id);
+	UpdateResponse delete(String collectionName, SolrDataQuery query);
+
+	/**
+	 * Delete the one object with provided id
+	 *
+	 * @param id must not be {@literal null}.
+	 * @return
+	 */
+	UpdateResponse deleteById(String id);
+
+	/**
+	 * Delete the one object with provided id in collection.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param id must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	UpdateResponse deleteById(String collectionName, String id);
 
 	/**
 	 * Delete objects with given ids
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param id must not be {@literal null}.
-	 * @return {@link UpdateResponse} containing delete result.
-	 * @since 3.0
+	 * @return
 	 */
-	UpdateResponse deleteByIds(String collection, Collection<String> id);
+	UpdateResponse deleteById(Collection<String> id);
+
+	/**
+	 * Delete objects with given ids in collection.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param ids must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	UpdateResponse deleteById(String collectionName, Collection<String> ids);
 
 	/**
 	 * Execute the query against solr and return the first returned object
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @return the first matching object
-	 * @since 3.0
 	 */
-	<T> Optional<T> queryForObject(String collection, Query query, Class<T> clazz);
+	<T> T queryForObject(Query query, Class<T> clazz);
+
+	/**
+	 * Execute the query against specific collection and return the first returned object.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> T queryForObject(String collectionName, Query query, Class<T> clazz);
 
 	/**
 	 * Execute the query against solr and return the first returned object
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @param method must not be {@literal null}.
 	 * @return the first matching object
-	 * @since 3.0
+	 * @since 2.0
 	 */
-	<T> Optional<T> queryForObject(String collection, Query query, Class<T> clazz, RequestMethod method);
+	<T> T queryForObject(Query query, Class<T> clazz, RequestMethod method);
 
 	/**
-	 * Execute the query against solr and retrun result as {@link Page}
+	 * Execute the query against specific collection and return the first returned object.
 	 *
-	 * @param collection must not be {@literal null}.
-	 * @param query must not be {@literal null}.
-	 * @param clazz must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
-	 */
-	<T> ScoredPage<T> queryForPage(String collection, Query query, Class<T> clazz);
-
-	/**
-	 * Execute the query against solr and retrun result as {@link Page}
-	 *
-	 * @param collection must not be {@literal null}.
+	 * @param collectionName must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @param method must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
+	 * @since 2.1
 	 */
-	<T> ScoredPage<T> queryForPage(String collection, Query query, Class<T> clazz, RequestMethod method);
+	<T> T queryForObject(String collectionName, Query query, Class<T> clazz, RequestMethod method);
+
+	/**
+	 * Execute the query against solr and return result as {@link Page}.
+	 *
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 */
+	<T> ScoredPage<T> queryForPage(Query query, Class<T> clazz);
+
+	/**
+	 * Execute the query against specific collection and return result as {@link Page}.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> ScoredPage<T> queryForPage(String collectionName, Query query, Class<T> clazz);
+
+	/**
+	 * Execute the query against solr and return result as {@link Page}
+	 *
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.0
+	 */
+	<T> ScoredPage<T> queryForPage(Query query, Class<T> clazz, RequestMethod method);
+
+	/**
+	 * Execute the query against specific collection and return result as {@link Page}
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> ScoredPage<T> queryForPage(String collectionName, Query query, Class<T> clazz, RequestMethod method);
 
 	/**
 	 * Execute a facet query against solr facet result will be returned along with query result within the FacetPage
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
 	 */
-	<T> FacetPage<T> queryForFacetPage(String collection, FacetQuery query, Class<T> clazz);
+	<T> FacetPage<T> queryForFacetPage(FacetQuery query, Class<T> clazz);
 
 	/**
-	 * Execute a facet query against solr facet result will be returned along with query result within the FacetPage
+	 * Execute a facet query against specific collection. The facet result will be returned along with query result within
+	 * the {@link FacetPage}.
 	 *
-	 * @param collection must not be {@literal null}.
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> FacetPage<T> queryForFacetPage(String collectionName, FacetQuery query, Class<T> clazz);
+
+	/**
+	 * Execute a facet query against solr facet result will be returned along with query result within the
+	 * {@link FacetPage#}
+	 *
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @param method must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
+	 * @since 2.0
 	 */
-	<T> FacetPage<T> queryForFacetPage(String collection, FacetQuery query, Class<T> clazz, RequestMethod method);
+	<T> FacetPage<T> queryForFacetPage(FacetQuery query, Class<T> clazz, RequestMethod method);
+
+	/**
+	 * Execute a facet query against specific collection. The facet result will be returned along with query result within
+	 * the {@link FacetPage}.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> FacetPage<T> queryForFacetPage(String collectionName, FacetQuery query, Class<T> clazz, RequestMethod method);
 
 	/**
 	 * Execute a query and highlight matches in result
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
 	 */
-	<T> HighlightPage<T> queryForHighlightPage(String collection, HighlightQuery query, Class<T> clazz);
+	<T> HighlightPage<T> queryForHighlightPage(HighlightQuery query, Class<T> clazz);
+
+	/**
+	 * Execute a query and highlight matches in result within a specific collection.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> HighlightPage<T> queryForHighlightPage(String collectionName, HighlightQuery query, Class<T> clazz);
+
+	/**
+	 * Execute a query and highlight matches in result.
+	 *
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.0
+	 */
+	<T> HighlightPage<T> queryForHighlightPage(HighlightQuery query, Class<T> clazz, RequestMethod method);
 
 	/**
 	 * Execute a query and highlight matches in result
 	 *
-	 * @param collection must not be {@literal null}.
-	 * @param query must not be {@literal null}.
-	 * @param clazz must not be {@literal null}.
-	 * @param method must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.1
 	 */
-	<T> HighlightPage<T> queryForHighlightPage(String collection, HighlightQuery query, Class<T> clazz,
+	<T> HighlightPage<T> queryForHighlightPage(String collectionName, HighlightQuery query, Class<T> clazz,
 			RequestMethod method);
 
 	/**
 	 * Execute a query and highlight matches in result
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
+	 * @since 2.1
 	 */
-	<T> FacetAndHighlightPage<T> queryForFacetAndHighlightPage(String collection, FacetAndHighlightQuery query,
+	<T> FacetAndHighlightPage<T> queryForFacetAndHighlightPage(FacetAndHighlightQuery query, Class<T> clazz);
+
+	/**
+	 * Execute a query against specific collection and highlight matches in result.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> FacetAndHighlightPage<T> queryForFacetAndHighlightPage(String collectionName, FacetAndHighlightQuery query,
 			Class<T> clazz);
 
 	/**
 	 * Execute a query and highlight matches in result
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @param method must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
+	 * @since 2.1
 	 */
-	<T> FacetAndHighlightPage<T> queryForFacetAndHighlightPage(String collection, FacetAndHighlightQuery query,
+	<T> FacetAndHighlightPage<T> queryForFacetAndHighlightPage(FacetAndHighlightQuery query, Class<T> clazz,
+			RequestMethod method);
+
+	/**
+	 * Execute a query against specific collection and highlight matches in result.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> FacetAndHighlightPage<T> queryForFacetAndHighlightPage(String collectionName, FacetAndHighlightQuery query,
 			Class<T> clazz, RequestMethod method);
 
 	/**
 	 * Execute query using terms handler
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
 	 */
-	TermsPage queryForTermsPage(String collection, TermsQuery query);
+	TermsPage queryForTermsPage(TermsQuery query);
+
+	/**
+	 * Execute query using terms handler against given collection.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	TermsPage queryForTermsPage(String collectionName, TermsQuery query);
 
 	/**
 	 * Execute query using terms handler
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param method must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
+	 * @since 2.0
 	 */
-	TermsPage queryForTermsPage(String collection, TermsQuery query, RequestMethod method);
+	TermsPage queryForTermsPage(TermsQuery query, RequestMethod method);
+
+	/**
+	 * Execute query using terms handler against given collection.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	TermsPage queryForTermsPage(String collectionName, TermsQuery query, RequestMethod method);
 
 	/**
 	 * Executes the given {@link Query} and returns an open {@link Cursor} allowing to iterate of results, dynamically
 	 * fetching additional ones if required.
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
+	 * @since 1.3
 	 */
-	<T> Cursor<T> queryForCursor(String collection, Query query, Class<T> clazz);
+	<T> Cursor<T> queryForCursor(Query query, Class<T> clazz);
 
 	/**
 	 * Execute the query against solr and return result as {@link GroupPage}
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
+	 * @since 1.4
 	 */
-	<T> GroupPage<T> queryForGroupPage(String collection, Query query, Class<T> clazz);
+	<T> GroupPage<T> queryForGroupPage(Query query, Class<T> clazz);
 
 	/**
-	 * Execute the query against solr and return result as {@link GroupPage}
+	 * Execute the query against specific collection and return result as {@link GroupPage}.
 	 *
-	 * @param collection must not be {@literal null}.
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> GroupPage<T> queryForGroupPage(String collectionName, Query query, Class<T> clazz);
+
+	/**
+	 * Execute the query against solr and return result as {@link GroupPage}.
+	 *
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @param method must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
+	 * @since 2.0
 	 */
-	<T> GroupPage<T> queryForGroupPage(String collection, Query query, Class<T> clazz, RequestMethod method);
+	<T> GroupPage<T> queryForGroupPage(Query query, Class<T> clazz, RequestMethod method);
+
+	/**
+	 * Execute the query against specific collection and return result as {@link GroupPage}
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 */
+	<T> GroupPage<T> queryForGroupPage(String collectionName, Query query, Class<T> clazz, RequestMethod method);
 
 	/**
 	 * Execute the query against Solr and return result as {@link StatsPage}.
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @size 3.0
+	 * @return
+	 * @size 1.4
 	 */
-	<T> StatsPage<T> queryForStatsPage(String collection, Query query, Class<T> clazz);
+	<T> StatsPage<T> queryForStatsPage(Query query, Class<T> clazz);
+
+	/**
+	 * Execute the query against specific collection and return result as {@link StatsPage}.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> StatsPage<T> queryForStatsPage(String collectionName, Query query, Class<T> clazz);
 
 	/**
 	 * Execute the query against Solr and return result as {@link StatsPage}.
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @param method must not be {@literal null}.
-	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @return
+	 * @since 2.0
 	 */
-	<T> StatsPage<T> queryForStatsPage(String collection, Query query, Class<T> clazz, RequestMethod method);
+	<T> StatsPage<T> queryForStatsPage(Query query, Class<T> clazz, RequestMethod method);
+
+	/**
+	 * Execute the query against specific collection and return result as {@link StatsPage}.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> StatsPage<T> queryForStatsPage(String collectionName, Query query, Class<T> clazz, RequestMethod method);
 
 	/**
 	 * Execute the query against Solr and return result as page.
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @since 2.1
 	 */
-	<T, S extends Page<T>> S query(String collection, Query query, Class<T> clazz);
+	<T, S extends Page<T>> S query(Query query, Class<T> clazz);
 
 	/**
 	 * Execute the query against Solr and return result as page.
 	 *
-	 * @param collection must not be {@literal null}.
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return never {@literal null}.
+	 * @since 2.1
+	 */
+	<T, S extends Page<T>> S query(String collectionName, Query query, Class<T> clazz);
+
+
+	/**
+	 * Execute the query against Solr and return result as page.
+	 *
 	 * @param query must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @param method must not be {@literal null}.
 	 * @return never {@literal null}.
-	 * @since 3.0
+	 * @since 2.1
 	 */
-	<T, S extends Page<T>> S query(String collection, Query query, Class<T> clazz, RequestMethod method);
+	<T, S extends Page<T>> S query(Query query, Class<T> clazz, RequestMethod method);
+
+	/**
+	 * Execute the query against Solr and return result as page.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return never {@literal null}.
+	 * @since 2.1
+	 */
+	<T, S extends Page<T>> S query(String collectionName, Query query, Class<T> clazz, RequestMethod method);
 
 	/**
 	 * Executes a realtime get using given id.
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param id must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @return
-	 * @since 3.0
+	 * @since 1.4
 	 */
-	<T> Optional<T> getById(String collection, Object id, Class<T> clazz);
+	<T> T getById(Serializable id, Class<T> clazz);
+
+	/**
+	 * Executes a realtime get on given collection using given id.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param id must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> T getById(String collectionName, Serializable id, Class<T> clazz);
 
 	/**
 	 * Executes a realtime get using given ids.
 	 *
-	 * @param collection must not be {@literal null}.
 	 * @param ids must not be {@literal null}.
 	 * @param clazz must not be {@literal null}.
 	 * @return
-	 * @since 3.0
+	 * @since 1.4
 	 */
-	<T> Collection<T> getByIds(String collection, Collection<?> ids, Class<T> clazz);
+	<T> Collection<T> getById(Collection<? extends Serializable> ids, Class<T> clazz);
+
+	/**
+	 * Executes a realtime get on given collection using given ids.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param ids must not be {@literal null}.
+	 * @param clazz must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> Collection<T> getById(String collectionName, Collection<? extends Serializable> ids, Class<T> clazz);
 
 	/**
 	 * Send commit command {@link SolrClient#commit()}
-	 * 
-	 * @since 3.0
 	 */
-	void commit(String collection);
+	void commit();
+
+	/**
+	 * @param collectionName must not be {@literal null}.
+	 * @since 2.1
+	 */
+	void commit(String collectionName);
 
 	/**
 	 * Send soft commmit command {@link SolrClient#commit(boolean, boolean, boolean)}
-	 * 
-	 * @since 3.9
 	 */
-	void softCommit(String collection);
+	void softCommit();
+
+	/**
+	 * @param collectionName must not be {@literal null}.
+	 * @since 2.1
+	 */
+	void softCommit(String collectionName);
 
 	/**
 	 * send rollback command {@link SolrClient#rollback()}
-	 * 
-	 * @since 3.0
 	 */
-	void rollback(String collection);
+	void rollback();
+
+	/**
+	 * @param collectionName must not be {@literal null}.
+	 * @since 2.1
+	 */
+	void rollback(String collectionName);
 
 	/**
 	 * Convert given bean into a solrj InputDocument
-	 * 
+	 *
 	 * @param bean
 	 * @return
 	 */
@@ -496,11 +809,21 @@ public interface SolrOperations {
 
 	/**
 	 * Execute action within callback
-	 * 
+	 *
 	 * @param action
 	 * @return
 	 */
 	<T> T execute(SolrCallback<T> action);
+
+	/**
+	 * Execute action within callback on a given collection.
+	 *
+	 * @param collection must not be {@literal null}.
+	 * @param action must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	<T> T execute(String collection, CollectionCallback<T> action);
 
 	/**
 	 * Get the {@link SchemaOperations} executable.

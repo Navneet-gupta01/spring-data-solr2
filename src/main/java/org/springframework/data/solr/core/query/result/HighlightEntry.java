@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.springframework.data.solr.core.query.Field;
 import org.springframework.data.solr.core.query.SimpleField;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -32,7 +31,7 @@ import org.springframework.util.Assert;
 public class HighlightEntry<T> {
 
 	private final T entity;
-	private final List<Highlight> highlights = new ArrayList<>(1);
+	private final List<Highlight> highlights = new ArrayList<Highlight>(1);
 
 	/**
 	 * @param entity must not be null
@@ -88,11 +87,11 @@ public class HighlightEntry<T> {
 		 * @param field must not be null
 		 * @param snipplets
 		 */
-		Highlight(Field field, @Nullable List<String> snipplets) {
+		Highlight(Field field, List<String> snipplets) {
 			Assert.notNull(field, "Field must not be null!");
 
 			this.field = field;
-			this.snipplets = snipplets != null ? snipplets : Collections.emptyList();
+			this.snipplets = snipplets;
 		}
 
 		Highlight(String fieldname, List<String> snipplets) {
@@ -110,7 +109,7 @@ public class HighlightEntry<T> {
 		 * @return empty list none available
 		 */
 		public List<String> getSnipplets() {
-			return this.snipplets;
+			return this.snipplets != null ? this.snipplets : Collections.<String> emptyList();
 		}
 
 	}

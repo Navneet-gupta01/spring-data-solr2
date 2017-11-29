@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,8 @@
  */
 package org.springframework.data.solr.repository;
 
-import static org.mockito.ArgumentMatchers.eq;
-
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -26,21 +24,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Christoph Strobl
- * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("TransactionalSolrRepositoryTest-context.xml")
-@Transactional(transactionManager = "transactionManager")
-@Rollback(false)
+@Transactional
+@TransactionConfiguration(defaultRollback = false, transactionManager = "transactionManager")
 public class ITestTransactionalSolrRepositoryDeleteOperationRollbackFalse extends TransactionalIntegrationTestsBase {
 
 	private static final String ID = "id-tansaction-committed";
@@ -56,13 +53,13 @@ public class ITestTransactionalSolrRepositoryDeleteOperationRollbackFalse extend
 
 	@AfterTransaction
 	public void checkIfDeleted() throws SolrServerException, IOException {
-		Mockito.verify(solrClientMock, Mockito.times(1)).commit(eq("collection1"));
+		Mockito.verify(solrClientMock, Mockito.times(1)).commit();
 		Mockito.verify(solrClientMock, Mockito.never()).rollback();
 	}
 
 	@Test
 	public void testDeleteById() {
-		repo.deleteById(ID);
+		repo.delete(ID);
 	}
 
 	@Test
@@ -76,7 +73,7 @@ public class ITestTransactionalSolrRepositoryDeleteOperationRollbackFalse extend
 	public void testDeleteMultipleObjects() {
 		ProductBean bean = new ProductBean();
 		bean.setId(ID);
-		repo.deleteAll(Collections.singletonList(bean));
+		repo.delete(Arrays.asList(bean));
 	}
 
 	@Test

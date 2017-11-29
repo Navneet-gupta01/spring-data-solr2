@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import org.springframework.data.geo.Box;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
-import org.springframework.lang.Nullable;
 
 /**
  * @author Christoph Strobl
@@ -31,8 +30,8 @@ import org.springframework.lang.Nullable;
  */
 public class Crotch extends Criteria {
 
-	private List<Criteria> siblings = new ArrayList<>();
-	private @Nullable Node mostRecentSibling = null;
+	private List<Criteria> siblings = new ArrayList<Criteria>();
+	private Node mostRecentSibling = null;
 
 	Crotch() {}
 
@@ -45,7 +44,7 @@ public class Crotch extends Criteria {
 	}
 
 	@Override
-	public Crotch is(@Nullable Object o) {
+	public Crotch is(Object o) {
 		mostRecentSibling.is(o);
 		return this;
 	}
@@ -177,13 +176,13 @@ public class Crotch extends Criteria {
 	}
 
 	@Override
-	public Crotch between(@Nullable Object lowerBound, @Nullable Object upperBound) {
+	public Crotch between(Object lowerBound, Object upperBound) {
 		mostRecentSibling.between(lowerBound, upperBound);
 		return this;
 	}
 
 	@Override
-	public Crotch between(@Nullable Object lowerBound, @Nullable Object upperBound, boolean includeLowerBound, boolean includeUpperBound) {
+	public Crotch between(Object lowerBound, Object upperBound, boolean includeLowerBound, boolean includeUpperBound) {
 		mostRecentSibling.between(lowerBound, upperBound, includeLowerBound, includeUpperBound);
 		return this;
 	}
@@ -225,7 +224,7 @@ public class Crotch extends Criteria {
 	}
 
 	@Override
-	public Crotch within(Point location, @Nullable Distance distance) {
+	public Crotch within(Point location, Distance distance) {
 		mostRecentSibling.within(location, distance);
 		return this;
 	}
@@ -237,7 +236,7 @@ public class Crotch extends Criteria {
 	}
 
 	@Override
-	public Crotch near(Point location, @Nullable Distance distance) {
+	public Crotch near(Point location, Distance distance) {
 		mostRecentSibling.near(location, distance);
 		return this;
 	}

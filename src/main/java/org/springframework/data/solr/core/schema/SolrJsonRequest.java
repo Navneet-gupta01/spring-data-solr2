@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2017 the original author or authors.
+ * Copyright 2014 - 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.ContentStream;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -40,8 +39,8 @@ public class SolrJsonRequest extends SolrRequest<SolrJsonResponse> {
 	private static final long serialVersionUID = 5786008418321490550L;
 
 	private ModifiableSolrParams params = new ModifiableSolrParams();
-	private List<ContentStream> contentStream = Collections.emptyList();
-	private @Nullable ContentParser contentParser;
+	private List<ContentStream> contentStream = null;
+	private ContentParser contentParser;
 
 	public SolrJsonRequest(METHOD method, String path) {
 		super(method, path);
@@ -49,11 +48,10 @@ public class SolrJsonRequest extends SolrRequest<SolrJsonResponse> {
 		setContentParser(new MappingJacksonRequestContentParser());
 	}
 
-	private void setContentParser(@Nullable ContentParser requestParser) {
+	private void setContentParser(ContentParser requestParser) {
 		this.contentParser = requestParser != null ? requestParser : new MappingJacksonRequestContentParser();
 	}
 
-	@Nullable
 	public ContentParser getContentParser() {
 		return this.contentParser;
 	}
@@ -65,18 +63,27 @@ public class SolrJsonRequest extends SolrRequest<SolrJsonResponse> {
 
 	@Override
 	public Collection<ContentStream> getContentStreams() throws IOException {
-		return Collections.unmodifiableCollection(contentStream);
+		return contentStream != null ? Collections.<ContentStream> unmodifiableCollection(contentStream) : null;
 	}
 
 	public void addContentToStream(Object content) {
 
-		contentStream = new ArrayList<>(contentStream);
+		if (contentStream == null) {
+			this.contentStream = new ArrayList<ContentStream>();
+		}
+
 		contentStream.add(getContentParser().parse(content));
 	}
 
 	@Override
 	public String toString() {
-		return getMethod().toString() + " " + getPath() + "\r\n" + quietlyReadContentStreams();
+		StringBuilder sb = new StringBuilder(getMethod().toString());
+		sb.append(" ");
+		sb.append(getPath());
+		sb.append("\r\n");
+		sb.append(quietlyReadContentStreams());
+
+		return sb.toString();
 	}
 
 	private String quietlyReadContentStreams() {

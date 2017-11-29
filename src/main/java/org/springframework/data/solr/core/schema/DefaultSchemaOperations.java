@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,15 @@
  */
 package org.springframework.data.solr.core.schema;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest;
 import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse.UpdateResponse;
+import org.springframework.data.solr.core.CollectionCallback;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.schema.SchemaDefinition.CopyFieldDefinition;
 import org.springframework.data.solr.core.schema.SchemaDefinition.FieldDefinition;
@@ -54,8 +58,13 @@ public class DefaultSchemaOperations implements SchemaOperations {
 	@Override
 	public String getSchemaName() {
 
-		return template
-				.execute(solrClient -> new SchemaRequest.SchemaName().process(solrClient, collection).getSchemaName());
+		return template.execute(collection, new CollectionCallback<String>() {
+
+			@Override
+			public String doInSolr(SolrClient solrClient, String collection) throws SolrServerException, IOException {
+				return new SchemaRequest.SchemaName().process(solrClient, collection).getSchemaName();
+			}
+		});
 
 	}
 
@@ -65,8 +74,13 @@ public class DefaultSchemaOperations implements SchemaOperations {
 	 */
 	@Override
 	public Double getSchemaVersion() {
-		return template.execute(
-				solrClient -> new Double(new SchemaRequest.SchemaVersion().process(solrClient, collection).getSchemaVersion()));
+		return template.execute(collection, new CollectionCallback<Double>() {
+
+			@Override
+			public Double doInSolr(SolrClient solrClient, String collection) throws SolrServerException, IOException {
+				return new Double(new SchemaRequest.SchemaVersion().process(solrClient, collection).getSchemaVersion());
+			}
+		});
 	}
 
 	/*
@@ -76,8 +90,14 @@ public class DefaultSchemaOperations implements SchemaOperations {
 	@Override
 	public SchemaDefinition readSchema() {
 
-		SchemaRepresentation representation = template
-				.execute(solrClient -> new SchemaRequest().process(solrClient, collection).getSchemaRepresentation());
+		SchemaRepresentation representation = template.execute(collection, new CollectionCallback<SchemaRepresentation>() {
+
+			@Override
+			public SchemaRepresentation doInSolr(SolrClient solrClient, String collection)
+					throws SolrServerException, IOException {
+				return new SchemaRequest().process(solrClient, collection).getSchemaRepresentation();
+			}
+		});
 
 		SchemaDefinition sd = new SchemaDefinition(collection);
 
@@ -113,15 +133,19 @@ public class DefaultSchemaOperations implements SchemaOperations {
 
 	private void addField(final FieldDefinition field) {
 
-		template.execute(solrClient -> {
+		template.execute(collection, new CollectionCallback<Integer>() {
 
-			UpdateResponse response = new SchemaRequest.AddField(field.asMap()).process(solrClient, collection);
-			if (hasErrors(response)) {
-				throw new SchemaModificationException(
-						String.format("Adding field %s with args %s to collection %s failed with status %s. Server returned %s.",
-								field.getName(), field.asMap(), collection, response.getStatus(), response));
+			@Override
+			public Integer doInSolr(SolrClient solrClient, String collection) throws SolrServerException, IOException {
+
+				UpdateResponse response = new SchemaRequest.AddField(field.asMap()).process(solrClient, collection);
+				if (hasErrors(response)) {
+					throw new SchemaModificationException(
+							String.format("Adding field %s with args %s to collection %s failed with status %s. Server returned %s.",
+									field.getName(), field.asMap(), collection, response.getStatus(), response));
+				}
+				return Integer.valueOf(response.getStatus());
 			}
-			return Integer.valueOf(response.getStatus());
 		});
 
 		if (!CollectionUtils.isEmpty(field.getCopyFields())) {
@@ -136,18 +160,22 @@ public class DefaultSchemaOperations implements SchemaOperations {
 
 	private void addCopyField(final CopyFieldDefinition field) {
 
-		template.execute(solrClient -> {
+		template.execute(collection, new CollectionCallback<Integer>() {
 
-			UpdateResponse response = new SchemaRequest.AddCopyField(field.getSource(), field.getDestination())
-					.process(solrClient, collection);
+			@Override
+			public Integer doInSolr(SolrClient solrClient, String collection) throws SolrServerException, IOException {
 
-			if (hasErrors(response)) {
-				throw new SchemaModificationException(String.format(
-						"Adding copy field %s with destinations %s to collection %s failed with status %s. Server returned %s.",
-						field.getSource(), field.getDestination(), collection, response.getStatus(), response));
+				UpdateResponse response = new SchemaRequest.AddCopyField(field.getSource(), field.getDestination())
+						.process(solrClient, collection);
+
+				if (hasErrors(response)) {
+					throw new SchemaModificationException(String.format(
+							"Adding copy field %s with destinations %s to collection %s failed with status %s. Server returned %s.",
+							field.getSource(), field.getDestination(), collection, response.getStatus(), response));
+				}
+
+				return Integer.valueOf(response.getStatus());
 			}
-
-			return Integer.valueOf(response.getStatus());
 		});
 	}
 
@@ -158,16 +186,20 @@ public class DefaultSchemaOperations implements SchemaOperations {
 	@Override
 	public void removeField(final String name) {
 
-		template.execute(solrClient -> {
+		template.execute(collection, new CollectionCallback<Integer>() {
 
-			UpdateResponse response = new SchemaRequest.DeleteField(name).process(solrClient, collection);
-			if (hasErrors(response)) {
-				throw new SchemaModificationException(
-						String.format("Removing field with name %s from collection %s failed with status %s. Server returned %s.",
-								name, collection, response.getStatus(), response));
+			@Override
+			public Integer doInSolr(SolrClient solrClient, String collection) throws SolrServerException, IOException {
+
+				UpdateResponse response = new SchemaRequest.DeleteField(name).process(solrClient, collection);
+				if (hasErrors(response)) {
+					throw new SchemaModificationException(
+							String.format("Removing field with name %s from collection %s failed with status %s. Server returned %s.",
+									name, collection, response.getStatus(), response));
+				}
+
+				return Integer.valueOf(response.getStatus());
 			}
-
-			return Integer.valueOf(response.getStatus());
 		});
 	}
 

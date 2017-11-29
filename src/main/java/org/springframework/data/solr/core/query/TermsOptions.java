@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,27 @@
  */
 package org.springframework.data.solr.core.query;
 
-import org.springframework.lang.Nullable;
-
 /**
  * @author Christoph Strobl
+ * 
  */
 public class TermsOptions {
 
 	public static final Sort DEFAULT_SORT = Sort.COUNT;
 
-	private @Nullable BoundTerm lowerBoundTerm;
+	private BoundTerm lowerBoundTerm;
 
-	private @Nullable BoundTerm upperBoundTerm;
+	private BoundTerm upperBoundTerm;
 
 	private int minCount = -1;
 
 	private int maxCount = -1;
 
-	private @Nullable String prefix;
+	private String prefix;
 
-	private @Nullable String regex;
+	private String regex;
 
-	private @Nullable RegexFlag regexFlag;
+	private RegexFlag regexFlag;
 
 	private int limit = -1;
 
@@ -44,7 +43,6 @@ public class TermsOptions {
 
 	private boolean raw = false;
 
-	@Nullable
 	public BoundTerm getLowerBoundTerm() {
 		return lowerBoundTerm;
 	}
@@ -53,7 +51,6 @@ public class TermsOptions {
 		this.lowerBoundTerm = lowerBoundTerm;
 	}
 
-	@Nullable
 	public BoundTerm getUpperBoundTerm() {
 		return upperBoundTerm;
 	}
@@ -78,7 +75,6 @@ public class TermsOptions {
 		this.maxCount = maxCount;
 	}
 
-	@Nullable
 	public String getPrefix() {
 		return prefix;
 	}
@@ -87,7 +83,6 @@ public class TermsOptions {
 		this.prefix = prefix;
 	}
 
-	@Nullable
 	public String getRegex() {
 		return regex;
 	}
@@ -96,7 +91,6 @@ public class TermsOptions {
 		this.regex = regex;
 	}
 
-	@Nullable
 	public RegexFlag getRegexFlag() {
 		return regexFlag;
 	}
@@ -113,7 +107,6 @@ public class TermsOptions {
 		this.limit = limit;
 	}
 
-	@Nullable
 	public Sort getSort() {
 		return sort;
 	}
@@ -132,14 +125,14 @@ public class TermsOptions {
 
 	/**
 	 * @author Christoph Strobl
+	 * 
 	 */
 	public static class BoundTerm {
 
-		private @Nullable String term;
+		private String term;
 
 		private boolean include;
 
-		@Nullable
 		public String getTerm() {
 			return term;
 		}

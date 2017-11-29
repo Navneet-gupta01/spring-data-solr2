@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,12 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
  * Set of options that could be set for a {@link Query} in order to have grouped results.
  * 
  * @author Francisco Spaeth
- * @author Christoph Strobl
  * @since 1.4
  */
 public class GroupOptions {
@@ -36,14 +34,14 @@ public class GroupOptions {
 	int DEFAULT_GROUP_LIMIT = 1;
 	int DEFAULT_CACHE_PERCENT = 0;
 
-	private List<Field> groupByFields = new ArrayList<>(0);
-	private List<Function> groupByFunctions = new ArrayList<>(0);
-	private List<Query> groupByQuery = new ArrayList<>(0);
+	private List<Field> groupByFields = new ArrayList<Field>(0);
+	private List<Function> groupByFunctions = new ArrayList<Function>(0);
+	private List<Query> groupByQuery = new ArrayList<Query>(0);
 
-	private @Nullable Integer offset = null;
-	private @Nullable Integer limit = null;
+	private Integer offset = null;
+	private Integer limit = null;
 
-	private @Nullable Sort sort;
+	private Sort sort;
 
 	private boolean truncateFacets = false;
 	private boolean groupFacets = false;
@@ -137,7 +135,7 @@ public class GroupOptions {
 	 * @param offset
 	 * @return
 	 */
-	public GroupOptions setOffset(@Nullable Integer offset) {
+	public GroupOptions setOffset(Integer offset) {
 
 		this.offset = offset == null ? null : Math.max(0, offset);
 		return this;
@@ -146,7 +144,6 @@ public class GroupOptions {
 	/**
 	 * @return initial offset of each group
 	 */
-	@Nullable
 	public Integer getOffset() {
 		return offset;
 	}
@@ -154,7 +151,6 @@ public class GroupOptions {
 	/**
 	 * @return the number of rows to return for each group.
 	 */
-	@Nullable
 	public Integer getLimit() {
 		return limit;
 	}
@@ -177,7 +173,7 @@ public class GroupOptions {
 	 * @param sort
 	 * @return
 	 */
-	public GroupOptions addSort(@Nullable Sort sort) {
+	public GroupOptions addSort(Sort sort) {
 
 		if (sort == null) {
 			return this;
@@ -195,7 +191,6 @@ public class GroupOptions {
 	/**
 	 * @return sort instruction on how to sort elements within a single group.
 	 */
-	@Nullable
 	public Sort getSort() {
 		return sort;
 	}
@@ -295,7 +290,6 @@ public class GroupOptions {
 		return groupMain;
 	}
 
-	@Nullable
 	public Pageable getPageRequest() {
 
 		if (this.limit == null && this.offset == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.springframework.data.mapping.PropertyHandler;
 import org.springframework.data.solr.core.mapping.SolrPersistentEntity;
 import org.springframework.data.solr.core.mapping.SolrPersistentProperty;
 import org.springframework.data.solr.core.schema.SchemaDefinition.FieldDefinition;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -35,21 +34,24 @@ public class SolrSchemaResolver {
 
 		Assert.notNull(entity, "Schema cannot be resolved for 'null'.");
 
-		final SchemaDefinition schemaDefinition = new SchemaDefinition(entity.getCollectionName());
+		final SchemaDefinition schemaDefinition = new SchemaDefinition(entity.getSolrCoreName());
 
-		entity.doWithProperties((PropertyHandler<SolrPersistentProperty>) persistentProperty -> {
+		entity.doWithProperties(new PropertyHandler<SolrPersistentProperty>() {
 
-			FieldDefinition fieldDefinition = createFieldDefinitionForProperty(persistentProperty);
-			if (fieldDefinition != null) {
-				schemaDefinition.addFieldDefinition(fieldDefinition);
+			@Override
+			public void doWithPersistentProperty(SolrPersistentProperty persistentProperty) {
+
+				FieldDefinition fieldDefinition = createFieldDefinitionForProperty(persistentProperty);
+				if (fieldDefinition != null) {
+					schemaDefinition.addFieldDefinition(fieldDefinition);
+				}
 			}
 		});
 
 		return schemaDefinition;
 	}
 
-	@Nullable
-	protected FieldDefinition createFieldDefinitionForProperty(@Nullable SolrPersistentProperty property) {
+	protected FieldDefinition createFieldDefinitionForProperty(SolrPersistentProperty property) {
 
 		if (property == null || property.isReadonly() || property.isTransient()) {
 			return null;

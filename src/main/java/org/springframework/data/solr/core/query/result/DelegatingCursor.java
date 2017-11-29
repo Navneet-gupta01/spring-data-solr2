@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.NoSuchElementException;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.params.CursorMarkParams;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -39,7 +38,7 @@ import org.springframework.util.StringUtils;
 public abstract class DelegatingCursor<T> implements Cursor<T> {
 
 	private State state;
-	private @Nullable String cursorMark;
+	private String cursorMark;
 	private long position;
 	private Iterator<T> delegate;
 	private final SolrQuery referenceQuery;
@@ -104,10 +103,10 @@ public abstract class DelegatingCursor<T> implements Cursor<T> {
 		return source.next();
 	}
 
-	private void load(@Nullable String cursorMark) {
+	private void load(String cursorMark) {
 
 		SolrQuery query = referenceQuery.getCopy();
-		query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
+		query.set(CursorMarkParams.CURSOR_MARK_PARAM, this.getCursorMark());
 
 		PartialResult<T> result = doLoad(query);
 		process(result);
@@ -121,7 +120,7 @@ public abstract class DelegatingCursor<T> implements Cursor<T> {
 	 */
 	protected abstract PartialResult<T> doLoad(SolrQuery nativeQuery);
 
-	private void process(@Nullable PartialResult<T> result) {
+	private void process(PartialResult<T> result) {
 
 		if (result == null) {
 			this.delegate = Collections.<T> emptyList().iterator();
@@ -163,7 +162,7 @@ public abstract class DelegatingCursor<T> implements Cursor<T> {
 	 * 
 	 * @param cursorMark
 	 */
-	protected void doOpen(@Nullable String cursorMark) {
+	protected void doOpen(String cursorMark) {
 		load(cursorMark);
 	}
 
@@ -214,7 +213,6 @@ public abstract class DelegatingCursor<T> implements Cursor<T> {
 	 * (non-Javadoc)
 	 * @see org.springframework.data.solr.core.query.result.Cursor#getCursorMark()
 	 */
-	@Nullable
 	@Override
 	public String getCursorMark() {
 		return this.cursorMark;
@@ -269,9 +267,9 @@ public abstract class DelegatingCursor<T> implements Cursor<T> {
 		private String nextCursorMark;
 		private Collection<T> items;
 
-		public PartialResult(String nextCursorMark, @Nullable Collection<T> items) {
+		public PartialResult(String nextCursorMark, Collection<T> items) {
 			this.nextCursorMark = nextCursorMark;
-			this.items = (items != null ? new ArrayList<>(items) : Collections.<T> emptyList());
+			this.items = (items != null ? new ArrayList<T>(items) : Collections.<T> emptyList());
 		}
 
 		/**

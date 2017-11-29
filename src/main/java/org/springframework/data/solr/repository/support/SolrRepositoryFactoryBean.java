@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.springframework.data.repository.core.support.TransactionalRepositoryF
 import org.springframework.data.solr.core.SolrOperations;
 import org.springframework.data.solr.core.convert.SolrConverter;
 import org.springframework.data.solr.core.mapping.SimpleSolrMappingContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -37,14 +36,14 @@ import org.springframework.util.Assert;
 public class SolrRepositoryFactoryBean<T extends Repository<S, ID>, S, ID extends Serializable>
 		extends TransactionalRepositoryFactoryBeanSupport<T, S, ID> {
 
-	private @Nullable SolrClient solrClient;
-	private @Nullable SolrOperations operations;
+	private SolrClient solrClient;
+	private SolrOperations operations;
 	private boolean schemaCreationSupport;
-	private @Nullable SimpleSolrMappingContext solrMappingContext;
-	private @Nullable SolrConverter solrConverter;
+	private SimpleSolrMappingContext solrMappingContext;
+	private SolrConverter solrConverter;
 
 	/**
-	 * Creates a new {@link SolrRepositoryFactoryBean} for the given repository interface.
+	 * Creates a new {@link MongoRepositoryFactoryBean} for the given repository interface.
 	 * 
 	 * @param repositoryInterface must not be {@literal null}.
 	 */
@@ -90,7 +89,6 @@ public class SolrRepositoryFactoryBean<T extends Repository<S, ID>, S, ID extend
 	 * @return
 	 * @since 1.4
 	 */
-	@Nullable
 	public SimpleSolrMappingContext getSolrMappingContext() {
 		return solrMappingContext;
 	}
@@ -98,7 +96,6 @@ public class SolrRepositoryFactoryBean<T extends Repository<S, ID>, S, ID extend
 	/**
 	 * @return SolrOperations to be used for eg. custom implementation
 	 */
-	@Nullable
 	protected SolrOperations getSolrOperations() {
 		return this.operations;
 	}

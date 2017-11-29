@@ -24,7 +24,6 @@ import org.apache.solr.client.solrj.impl.LBHttpSolrClient;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -33,13 +32,13 @@ import org.springframework.util.Assert;
  * @author Christoph Strobl
  * @since 2.0
  */
-public class HttpSolrClientFactoryBean extends HttpSolrClientFactory
-		implements FactoryBean<SolrClient>, InitializingBean, DisposableBean {
+public class HttpSolrClientFactoryBean extends HttpSolrClientFactory implements FactoryBean<SolrClient>,
+		InitializingBean, DisposableBean {
 
 	private static final String SERVER_URL_SEPARATOR = ",";
-	private @Nullable String url;
-	private @Nullable Integer timeout;
-	private @Nullable Integer maxConnections;
+	private String url;
+	private Integer timeout;
+	private Integer maxConnections;
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -58,7 +57,7 @@ public class HttpSolrClientFactoryBean extends HttpSolrClientFactory
 	private void createHttpSolrClient() {
 		HttpSolrClient httpSolrClient = new HttpSolrClient(this.url);
 		if (timeout != null) {
-			httpSolrClient.setConnectionTimeout(timeout);
+			httpSolrClient.setConnectionTimeout(timeout.intValue());
 		}
 		if (maxConnections != null) {
 			httpSolrClient.setMaxTotalConnections(maxConnections);
@@ -70,7 +69,7 @@ public class HttpSolrClientFactoryBean extends HttpSolrClientFactory
 		try {
 			LBHttpSolrClient lbHttpSolrClient = new LBHttpSolrClient(StringUtils.split(this.url, SERVER_URL_SEPARATOR));
 			if (timeout != null) {
-				lbHttpSolrClient.setConnectionTimeout(timeout);
+				lbHttpSolrClient.setConnectionTimeout(timeout.intValue());
 			}
 			this.setSolrClient(lbHttpSolrClient);
 		} catch (MalformedURLException e) {

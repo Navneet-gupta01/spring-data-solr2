@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@ package org.springframework.data.solr.core.mapping;
 
 import java.util.Collection;
 
-import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.PersistentProperty;
-import org.springframework.lang.Nullable;
 
 /**
  * @author Christoph Strobl
@@ -55,7 +53,6 @@ public interface SolrPersistentProperty extends PersistentProperty<SolrPersisten
 	/**
 	 * @return property boost value if {@link #isBoosted()}, null otherwise
 	 */
-	@Nullable
 	Float getBoost();
 
 	/**
@@ -81,13 +78,11 @@ public interface SolrPersistentProperty extends PersistentProperty<SolrPersisten
 	 * @return mapped solr type name
 	 * @since 1.3
 	 */
-	@Nullable
 	String getSolrTypeName();
 
 	/**
 	 * @since 1.3
 	 */
-	@Nullable
 	Object getDefaultValue();
 
 	/**
@@ -111,7 +106,8 @@ public interface SolrPersistentProperty extends PersistentProperty<SolrPersisten
 	/**
 	 * Returns whether the property is a <em>potential</em> score property of the owning {@link PersistentEntity}. This
 	 * method is mainly used by {@link PersistentEntity} implementation to discover score property candidates on
-	 * {@link PersistentEntity} creation you should rather call to determine whether the current property is the score
+	 * {@link PersistentEntity} creation you should rather call
+	 * {@link PersistentEntity#isScoreProperty(PersistentProperty)} to determine whether the current property is the score
 	 * property of that {@link PersistentEntity} under consideration.
 	 * 
 	 * @return
@@ -128,14 +124,7 @@ public interface SolrPersistentProperty extends PersistentProperty<SolrPersisten
 	 */
 	boolean isDynamicProperty();
 
-	/**
-	 * @return {@literal true} if property has set annotation {@link Field#child()} to true or is annotated with
-	 *         {@link ChildDocument}.
-	 * @since 3.0
-	 */
-	boolean isChildProperty();
-
-	enum PropertyToFieldNameConverter implements Converter<SolrPersistentProperty, String> {
+	public enum PropertyToFieldNameConverter implements Converter<SolrPersistentProperty, String> {
 
 		INSTANCE;
 

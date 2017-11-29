@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-207 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.springframework.data.solr.repository.support;
 
+import java.io.Serializable;
+
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.solr.core.mapping.SolrPersistentEntity;
 import org.springframework.data.solr.core.mapping.SolrPersistentProperty;
@@ -24,7 +26,6 @@ import org.springframework.util.Assert;
 
 /**
  * @author Christoph Strobl
- * @author Mark Paluch
  */
 public class SolrEntityInformationCreatorImpl implements SolrEntityInformationCreator {
 
@@ -38,11 +39,13 @@ public class SolrEntityInformationCreatorImpl implements SolrEntityInformationCr
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T, ID> SolrEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
+	public <T, ID extends Serializable> SolrEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
+		SolrPersistentEntity<T> persistentEntity = (SolrPersistentEntity<T>) mappingContext
+				.getPersistentEntity(domainClass);
 
-		SolrPersistentEntity<T> persistentEntity = (SolrPersistentEntity<T>) mappingContext.getRequiredPersistentEntity(domainClass);
+		Assert.notNull(persistentEntity, "not an managed type: " + domainClass);
 
-		return new MappingSolrEntityInformation<>(persistentEntity);
+		return new MappingSolrEntityInformation<T, ID>(persistentEntity);
 	}
 
 }

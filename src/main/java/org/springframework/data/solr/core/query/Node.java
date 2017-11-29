@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Collections;
 import org.springframework.data.geo.Box;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
-import org.springframework.lang.Nullable;
 
 /**
  * @author Christoph Strobl
@@ -29,14 +28,14 @@ import org.springframework.lang.Nullable;
  */
 public abstract class Node {
 
-	private @Nullable Node parent;
+	private Node parent;
 	private boolean isOr = false;
 	private boolean negating = false;
 
 	protected Node() {}
 
 	// ------- TREE ---------
-	protected void setParent(@Nullable Node parent) {
+	protected void setParent(Node parent) {
 		this.parent = parent;
 	}
 
@@ -68,7 +67,6 @@ public abstract class Node {
 	 * 
 	 * @return null in case no parent set.
 	 */
-	@Nullable
 	public Node getParent() {
 		return this.parent;
 	}
@@ -115,6 +113,7 @@ public abstract class Node {
 	/**
 	 * Combine node with new {@link Node} for given {@literal fieldname} using {@literal and}.
 	 * 
+	 * @param part
 	 * @return
 	 */
 	public abstract <T extends Node> T and(String fieldname);
@@ -130,6 +129,7 @@ public abstract class Node {
 	/**
 	 * Combine node with new {@link Node} for given {@literal fieldname} using {@literal and}.
 	 * 
+	 * @param part
 	 * @return
 	 */
 	public abstract <T extends Node> T or(String fieldname);

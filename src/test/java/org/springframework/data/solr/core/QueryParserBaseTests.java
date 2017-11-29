@@ -152,7 +152,7 @@ public class QueryParserBaseTests {
 
 	@Test
 	public void testFunctionFragmemtAppendsSingleArgumentCorrectly() {
-		Foo function = new Foo(Collections.singletonList("one"));
+		Foo function = new Foo(Arrays.asList("one"));
 
 		Assert.assertThat(parser.createFunctionFragment(function, 0), Is.is("{!func}foo(one)"));
 	}
@@ -173,7 +173,7 @@ public class QueryParserBaseTests {
 
 	@Test
 	public void testCreateFunctionFragmemtThrowsExceptionOnNullInArguments() {
-		List<Object> args = new ArrayList<>(1);
+		List<Object> args = new ArrayList<Object>(1);
 		args.add(null);
 
 		thrown.expect(IllegalArgumentException.class);
@@ -183,27 +183,27 @@ public class QueryParserBaseTests {
 
 	@Test
 	public void testCreateFunctionFragementsWihtNetsedFunction() {
-		Foo function = new Foo(Collections.singletonList(new Bar(Collections.singletonList("nested"))));
+		Foo function = new Foo(Arrays.asList(new Bar(Arrays.asList("nested"))));
 		Assert.assertThat(parser.createFunctionFragment(function, 0), Is.is("{!func}foo(bar(nested))"));
 	}
 
 	@Test
 	public void testCreateFunctionFragmentConvertsPointProperty() {
-		Foo function = new Foo(Collections.singletonList(new Point(37.767624D, -122.48526D)));
+		Foo function = new Foo(Arrays.asList(new Point(37.767624D, -122.48526D)));
 
 		Assert.assertThat(parser.createFunctionFragment(function, 0), Is.is("{!func}foo(37.767624,-122.48526)"));
 	}
 
 	@Test
 	public void testCreateFunctionFragmentConvertsDistanceProperty() {
-		Foo function = new Foo(Collections.singletonList(new Distance(5, Metrics.KILOMETERS)));
+		Foo function = new Foo(Arrays.asList(new Distance(5, Metrics.KILOMETERS)));
 
 		Assert.assertThat(parser.createFunctionFragment(function, 0), Is.is("{!func}foo(5.0)"));
 	}
 
 	@Test
 	public void testCreateFunctionFragmentUsesToStringForUnknowObject() {
-		Foo function = new Foo(Collections.singletonList(new FooBar()));
+		Foo function = new Foo(Arrays.asList(new FooBar()));
 
 		Assert.assertThat(parser.createFunctionFragment(function, 0), Is.is("{!func}foo(FooBar [])"));
 	}

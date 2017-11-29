@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.data.solr.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.solr.VersionUtil;
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.FacetOptions;
 import org.springframework.data.solr.core.query.FacetOptions.FacetParameter;
@@ -55,7 +57,6 @@ import org.springframework.data.solr.core.query.QueryParameter;
 import org.springframework.data.solr.core.query.SolrDataQuery;
 import org.springframework.data.solr.core.query.SpellcheckOptions;
 import org.springframework.data.solr.core.query.StatsOptions;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -89,7 +90,7 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 	public final SolrQuery doConstructSolrQuery(SolrDataQuery query) {
 		Assert.notNull(query, "Cannot construct solrQuery from null value.");
 		Assert.notNull(query.getCriteria(), "Query has to have a criteria.");
-		
+
 		SolrQuery solrQuery = new SolrQuery();
 		solrQuery.setParam(CommonParams.Q, getQueryString(query));
 		if (query instanceof Query) {
@@ -114,27 +115,13 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 		appendTimeAllowed(solrQuery, query.getTimeAllowed());
 		appendDefType(solrQuery, query.getDefType());
 		appendRequestHandler(solrQuery, query.getRequestHandler());
-		appendReRankQueryHandler(solrQuery,query.getRqqValue());
 
 		processGroupOptions(solrQuery, query);
 		processStatsOptions(solrQuery, query);
 		processSpellcheckOptions(solrQuery, query);
 
-		LOGGER.info(solrQuery.toQueryString());
-		
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Constructed SolrQuery:\r\n %s", solrQuery);
-		}
-	}
-
-	/**
-	 * @param solrQuery
-	 * @param rqqValue
-	 */
-	private void appendReRankQueryHandler(SolrQuery solrQuery, String rqqValue) {
-		if(StringUtils.isNotBlank(rqqValue)) {
-			solrQuery.set("rq", "{!rerank reRankQuery=$rqq reRankDocs=1000 reRankWeight=3}");
-			solrQuery.set("rqq", rqqValue);
 		}
 	}
 
@@ -265,7 +252,7 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 
 		SpellcheckOptions options = query.getSpellcheckOptions();
 
-		if (options.getQuery() != null && options.getQuery().getCriteria() != null) {
+		if (options.getQuery() != null) {
 			solrQuery.set(SpellingParams.SPELLCHECK_Q, createQueryStringFromCriteria(options.getQuery().getCriteria()));
 		}
 
@@ -274,8 +261,9 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 		for (Entry<String, Object> entry : options.getParams().entrySet()) {
 
 			if (entry.getValue() instanceof Iterable<?>) {
-				for (Object o : ((Iterable<?>) entry.getValue())) {
-					params.add(entry.getKey(), o.toString());
+				Iterator<?> it = ((Iterable<?>) entry.getValue()).iterator();
+				while (it.hasNext()) {
+					params.add(entry.getKey(), it.next().toString());
 				}
 			} else if (ObjectUtils.isArray(entry.getValue())) {
 				for (Object o : ObjectUtils.toObjectArray(entry.getValue())) {
@@ -357,8 +345,8 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 		solrQuery.setFacetMinCount(facetOptions.getFacetMinCount());
 		solrQuery.setFacetLimit(facetOptions.getPageable().getPageSize());
 		if (facetOptions.getPageable().getPageNumber() > 0) {
-			long offset = Math.max(0, facetOptions.getPageable().getOffset());
-			solrQuery.set(FacetParams.FACET_OFFSET, "" + offset);
+			int offset = Math.max(0, facetOptions.getPageable().getOffset());
+			solrQuery.set(FacetParams.FACET_OFFSET, offset);
 		}
 		if (FacetOptions.FacetSort.INDEX.equals(facetOptions.getFacetSort())) {
 			solrQuery.setFacetSort(FacetParams.FACET_SORT_INDEX);
@@ -447,6 +435,10 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 	}
 
 	private void appendFacetingOnPivot(SolrQuery solrQuery, FacetQuery query) {
+		if (VersionUtil.isSolr3XAvailable()) {
+			throw new UnsupportedOperationException(
+					"Pivot Facets are not available for solr version lower than 4.x - Please check your depdendencies.");
+		}
 
 		FacetOptions facetOptions = query.getFacetOptions();
 		String[] pivotFields = convertFieldListToStringArray(facetOptions.getFacetOnPivots());
@@ -476,7 +468,7 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 	 * @param solrQuery
 	 * @param sort
 	 */
-	protected void appendSort(SolrQuery solrQuery, @Nullable Sort sort) {
+	protected void appendSort(SolrQuery solrQuery, Sort sort) {
 		if (sort == null) {
 			return;
 		}
@@ -501,7 +493,7 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 	}
 
 	private List<String> getFilterQueryStrings(List<FilterQuery> filterQueries) {
-		List<String> filterQueryStrings = new ArrayList<>(filterQueries.size());
+		List<String> filterQueryStrings = new ArrayList<String>(filterQueries.size());
 
 		for (FilterQuery filterQuery : filterQueries) {
 			String filterQueryString = getQueryString(filterQuery);

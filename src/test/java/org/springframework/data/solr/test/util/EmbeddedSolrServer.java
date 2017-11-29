@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class EmbeddedSolrServer extends ExternalResource implements SolrClientFa
 	TemporaryFolder folder;
 	CoreContainer coreContainer;
 	private ClientCache clientCache = ClientCache.DISABLED;
-	ConcurrentHashMap<String, SolrClient> cachedClients = new ConcurrentHashMap<>();
+	ConcurrentHashMap<String, SolrClient> cachedClients = new ConcurrentHashMap<String, SolrClient>();
 
 	private EmbeddedSolrServer() {}
 
@@ -108,6 +108,7 @@ public class EmbeddedSolrServer extends ExternalResource implements SolrClientFa
 	 * (non-Javadoc)
 	 * @see org.springframework.data.solr.server.SolrClientFactory#getSolrClient(java.lang.String)
 	 */
+	@Override
 	@SuppressWarnings("serial")
 	public SolrClient getSolrClient(String collectionName) {
 
@@ -142,8 +143,9 @@ public class EmbeddedSolrServer extends ExternalResource implements SolrClientFa
 	 * (non-Javadoc)
 	 * @see org.springframework.data.solr.server.SolrClientFactory#getCores()
 	 */
+	@Override
 	public List<String> getCores() {
-		return new ArrayList<>(coreContainer.getAllCoreNames());
+		return new ArrayList<String>(coreContainer.getCoreNames());
 	}
 
 	/*
@@ -263,7 +265,7 @@ public class EmbeddedSolrServer extends ExternalResource implements SolrClientFa
 		}
 	}
 
-	public enum ClientCache {
+	public static enum ClientCache {
 		ENABLED, DISABLED
 	}
 

@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -32,10 +31,9 @@ import org.springframework.util.Assert;
  */
 class ParameterHolder<T extends QueryParameter> implements Iterable<T> {
 
-	private final Map<String, T> parameters = new LinkedHashMap<>(1);
+	private final Map<String, T> parameters = new LinkedHashMap<String, T>(1);
 
 	@SuppressWarnings("unchecked")
-	@Nullable
 	public <S> S getParameterValue(String parameterName) {
 		T parameter = this.parameters.get(parameterName);
 		if (parameter == null) {
@@ -58,7 +56,6 @@ class ParameterHolder<T extends QueryParameter> implements Iterable<T> {
 	 * @param parameterName
 	 * @return null if not found
 	 */
-	@Nullable
 	public T get(String parameterName) {
 		return this.parameters.get(parameterName);
 	}

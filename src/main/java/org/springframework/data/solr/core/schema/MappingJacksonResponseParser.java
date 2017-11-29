@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import javax.activation.MimeTypeParseException;
 import org.apache.solr.client.solrj.ResponseParser;
 import org.apache.solr.common.util.NamedList;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -43,7 +42,7 @@ public class MappingJacksonResponseParser extends ResponseParser {
 		this(defaultMimeType());
 	}
 
-	public MappingJacksonResponseParser(@Nullable MimeType responseType) {
+	public MappingJacksonResponseParser(MimeType responseType) {
 		this.responseType = responseType != null ? responseType : defaultMimeType();
 	}
 
@@ -65,7 +64,7 @@ public class MappingJacksonResponseParser extends ResponseParser {
 	@Override
 	public NamedList<Object> processResponse(InputStream body, String encoding) {
 
-		NamedList<Object> result = new NamedList<>();
+		NamedList<Object> result = new NamedList<Object>();
 		try {
 			result.add("json", StreamUtils.copyToString(body, Charset.forName(encoding)));
 		} catch (IOException e) {

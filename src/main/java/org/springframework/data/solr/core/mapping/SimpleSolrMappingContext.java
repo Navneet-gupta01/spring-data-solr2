@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,27 @@
  */
 package org.springframework.data.solr.core.mapping;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+
 import org.springframework.data.mapping.context.AbstractMappingContext;
-import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.data.solr.core.schema.SolrPersistentEntitySchemaCreator;
 import org.springframework.data.util.TypeInformation;
-import org.springframework.lang.Nullable;
 
 /**
  * Solr specific implementation of {@link org.springframework.data.mapping.context.MappingContext}
  * 
  * @author Christoph Strobl
  */
-public class SimpleSolrMappingContext
-		extends AbstractMappingContext<SimpleSolrPersistentEntity<?>, SolrPersistentProperty> {
+public class SimpleSolrMappingContext extends
+		AbstractMappingContext<SimpleSolrPersistentEntity<?>, SolrPersistentProperty> {
 
 	public SimpleSolrMappingContext() {
 		this(null);
 	}
 
-	public SimpleSolrMappingContext(@Nullable SolrPersistentEntitySchemaCreator schemaCreator) {
+	public SimpleSolrMappingContext(SolrPersistentEntitySchemaCreator schemaCreator) {
 		if (schemaCreator != null) {
 			setApplicationEventPublisher(new SolrMappingEventPublisher(schemaCreator));
 		}
@@ -42,13 +43,13 @@ public class SimpleSolrMappingContext
 
 	@Override
 	protected <T> SimpleSolrPersistentEntity<?> createPersistentEntity(TypeInformation<T> typeInformation) {
-		return new SimpleSolrPersistentEntity<>(typeInformation);
+		return new SimpleSolrPersistentEntity<T>(typeInformation);
 	}
 
 	@Override
-	protected SolrPersistentProperty createPersistentProperty(Property property, SimpleSolrPersistentEntity<?> owner,
-			SimpleTypeHolder simpleTypeHolder) {
-		return new SimpleSolrPersistentProperty(property, owner, simpleTypeHolder);
+	protected SolrPersistentProperty createPersistentProperty(Field field, PropertyDescriptor descriptor,
+			SimpleSolrPersistentEntity<?> owner, SimpleTypeHolder simpleTypeHolder) {
+		return new SimpleSolrPersistentProperty(field, descriptor, owner, simpleTypeHolder);
 	}
 
 }

@@ -27,7 +27,6 @@ import org.springframework.data.geo.Box;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,10 +42,10 @@ public class Criteria extends Node {
 	public static final String WILDCARD = "*";
 	public static final String CRITERIA_VALUE_SEPERATOR = " ";
 
-	private @Nullable Field field;
+	private Field field;
 	private float boost = Float.NaN;
 
-	private Set<Predicate> predicates = new LinkedHashSet<>();
+	private Set<Predicate> predicates = new LinkedHashSet<Predicate>();
 
 	public Criteria() {}
 
@@ -118,7 +117,7 @@ public class Criteria extends Node {
 	 * @param o
 	 * @return
 	 */
-	public Criteria is(@Nullable Object o) {
+	public Criteria is(Object o) {
 		if (o == null) {
 			return isNull();
 		}
@@ -398,7 +397,7 @@ public class Criteria extends Node {
 	 * @param upperBound
 	 * @return
 	 */
-	public Criteria between(@Nullable Object lowerBound, @Nullable Object upperBound) {
+	public Criteria between(Object lowerBound, Object upperBound) {
 		return between(lowerBound, upperBound, true, true);
 	}
 
@@ -411,9 +410,9 @@ public class Criteria extends Node {
 	 * @param includeUppderBound
 	 * @return
 	 */
-	public Criteria between(@Nullable Object lowerBound, @Nullable Object upperBound, boolean includeLowerBound, boolean includeUppderBound) {
-		predicates.add(new Predicate(OperationKey.BETWEEN,
-				new Object[] { lowerBound, upperBound, includeLowerBound, includeUppderBound }));
+	public Criteria between(Object lowerBound, Object upperBound, boolean includeLowerBound, boolean includeUppderBound) {
+		predicates.add(new Predicate(OperationKey.BETWEEN, new Object[] { lowerBound, upperBound, includeLowerBound,
+				includeUppderBound }));
 		return this;
 	}
 
@@ -497,11 +496,11 @@ public class Criteria extends Node {
 	 * @param distance
 	 * @return
 	 */
-	public Criteria within(Point location, @Nullable Distance distance) {
+	public Criteria within(Point location, Distance distance) {
 		Assert.notNull(location, "Location must not be null!");
 		assertPositiveDistanceValue(distance);
-		predicates.add(
-				new Predicate(OperationKey.WITHIN, new Object[] { location, distance != null ? distance : new Distance(0) }));
+		predicates.add(new Predicate(OperationKey.WITHIN, new Object[] { location,
+				distance != null ? distance : new Distance(0) }));
 		return this;
 	}
 
@@ -539,12 +538,12 @@ public class Criteria extends Node {
 	 * @throws IllegalArgumentException if location is null
 	 * @throws InvalidDataAccessApiUsageException if distance is negative
 	 */
-	public Criteria near(Point location, @Nullable Distance distance) {
+	public Criteria near(Point location, Distance distance) {
 		Assert.notNull(location, "Location must not be 'null' for near criteria.");
 		assertPositiveDistanceValue(distance);
 
-		predicates.add(
-				new Predicate(OperationKey.NEAR, new Object[] { location, distance != null ? distance : new Distance(0) }));
+		predicates.add(new Predicate(OperationKey.NEAR, new Object[] { location,
+				distance != null ? distance : new Distance(0) }));
 		return this;
 	}
 
@@ -581,7 +580,6 @@ public class Criteria extends Node {
 	 * 
 	 * @return null if not set
 	 */
-	@Nullable
 	public Field getField() {
 		return this.field;
 	}
@@ -609,7 +607,7 @@ public class Criteria extends Node {
 		return Collections.unmodifiableSet(this.predicates);
 	}
 
-	private void assertPositiveDistanceValue(@Nullable Distance distance) {
+	private void assertPositiveDistanceValue(Distance distance) {
 		if (distance != null && distance.getValue() < 0) {
 			throw new InvalidDataAccessApiUsageException("distance must not be negative.");
 		}
@@ -624,9 +622,9 @@ public class Criteria extends Node {
 
 	private void assertValuesPresent(Object... values) {
 		if (values.length == 0 || (values.length > 1 && values[1] instanceof Collection)) {
-			throw new InvalidDataAccessApiUsageException(
-					"At least one element " + (values.length > 0 ? ("of argument of type " + values[1].getClass().getName()) : "")
-							+ " has to be present.");
+			throw new InvalidDataAccessApiUsageException("At least one element "
+					+ (values.length > 0 ? ("of argument of type " + values[1].getClass().getName()) : "")
+					+ " has to be present.");
 		}
 	}
 
@@ -654,12 +652,12 @@ public class Criteria extends Node {
 
 	public enum OperationKey {
 		EQUALS("$equals"), CONTAINS("$contains"), STARTS_WITH("$startsWith"), ENDS_WITH("$endsWith"), EXPRESSION(
-				"$expression"), BETWEEN(
-						"$between"), NEAR("$near"), WITHIN("$within"), FUZZY("$fuzzy"), SLOPPY("$sloppy"), FUNCTION("$function");
+				"$expression"), BETWEEN("$between"), NEAR("$near"), WITHIN("$within"), FUZZY("$fuzzy"), SLOPPY("$sloppy"), FUNCTION(
+				"$function");
 
 		private final String key;
 
-		OperationKey(String key) {
+		private OperationKey(String key) {
 			this.key = key;
 		}
 
@@ -692,7 +690,6 @@ public class Criteria extends Node {
 		/**
 		 * @return null if not set
 		 */
-		@Nullable
 		public String getKey() {
 			return key;
 		}
@@ -709,7 +706,6 @@ public class Criteria extends Node {
 		/**
 		 * @return null if not set
 		 */
-		@Nullable
 		public Object getValue() {
 			return value;
 		}

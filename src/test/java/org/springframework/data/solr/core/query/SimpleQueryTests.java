@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.data.solr.core.query;
-
-import static org.hamcrest.CoreMatchers.*;
 
 import java.util.List;
 
@@ -69,15 +67,15 @@ public class SimpleQueryTests {
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void testAddProjection() {
-		Query query = new SimpleQuery().addProjectionOnField(new SimpleField("field_1"))
-				.addProjectionOnField(new SimpleField("field_2"));
+		Query query = new SimpleQuery().addProjectionOnField(new SimpleField("field_1")).addProjectionOnField(
+				new SimpleField("field_2"));
 		Assert.assertEquals(2, ((List) query.getProjectionOnFields()).size());
 	}
 
 	@Test
 	public void testSetPageRequest() {
 		SimpleQuery query = new SimpleQuery();
-		Assert.assertThat(query.getPageRequest().isUnpaged(), is(true));
+		Assert.assertNull(query.getPageRequest());
 		Assert.assertNull(query.getOffset());
 		Assert.assertNull(query.getRows());
 
@@ -85,7 +83,7 @@ public class SimpleQueryTests {
 
 		query.setPageRequest(alteredPage);
 		Assert.assertThat(query.getPageRequest(), IsEqual.equalTo(alteredPage));
-		Assert.assertThat(query.getSort(), IsEqual.equalTo(Sort.unsorted()));
+		Assert.assertNull(query.getSort());
 	}
 
 	@Test
@@ -107,8 +105,8 @@ public class SimpleQueryTests {
 
 	@Test
 	public void testCreateQueryWithSortedPageRequest() {
-		SimpleQuery query = new SimpleQuery(new SimpleStringCriteria("*:*"),
-				new PageRequest(0, 20, Sort.Direction.DESC, "value_1", "value_2"));
+		SimpleQuery query = new SimpleQuery(new SimpleStringCriteria("*:*"), new PageRequest(0, 20, Sort.Direction.DESC,
+				"value_1", "value_2"));
 		Assert.assertNotNull(query.getPageRequest());
 		Assert.assertNotNull(query.getSort());
 
@@ -156,8 +154,8 @@ public class SimpleQueryTests {
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void testAddGroupBy() {
-		Query query = new SimpleQuery().addGroupByField(new SimpleField("field_1"))
-				.addGroupByField(new SimpleField("field_2"));
+		Query query = new SimpleQuery().addGroupByField(new SimpleField("field_1")).addGroupByField(
+				new SimpleField("field_2"));
 		Assert.assertEquals(2, ((List) query.getGroupByFields()).size());
 	}
 
@@ -237,7 +235,7 @@ public class SimpleQueryTests {
 	@Test
 	public void testCloneWithTimeAllowed() {
 		Query source = new SimpleQuery(new Criteria("field_1").is("value_1"));
-		source.setTimeAllowed(10);
+		source.setTimeAllowed(Integer.valueOf(10));
 
 		Query destination = SimpleQuery.fromQuery(source);
 		Assert.assertEquals(source.getTimeAllowed(), destination.getTimeAllowed());
@@ -266,7 +264,7 @@ public class SimpleQueryTests {
 		Query query = new SimpleQuery(new Criteria("field_1").is("value_1"));
 		query.addSort(null);
 
-		Assert.assertEquals(query.getSort(), Sort.unsorted());
+		Assert.assertNull(query.getSort());
 	}
 
 	@Test
@@ -306,10 +304,10 @@ public class SimpleQueryTests {
 	@Test
 	public void shouldOverridePagableArgsByUsingExplicitSetters() {
 		SimpleQuery query = new SimpleQuery("*:*").setPageRequest(new PageRequest(1, 10));
-		query.setOffset(2L);
+		query.setOffset(2);
 		query.setRows(20);
 
-		Assert.assertThat(query.getOffset(), Is.is(2L));
+		Assert.assertThat(query.getOffset(), Is.is(2));
 		Assert.assertThat(query.getRows(), Is.is(20));
 	}
 }

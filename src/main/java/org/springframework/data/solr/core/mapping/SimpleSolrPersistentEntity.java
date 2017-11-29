@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,43 +17,46 @@ package org.springframework.data.solr.core.mapping;
 
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.expression.BeanFactoryAccessor;
 import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.data.mapping.MappingException;
+import org.springframework.data.annotation.Reference;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.PropertyHandler;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
+import org.springframework.data.mapping.model.MappingException;
 import org.springframework.data.solr.repository.Score;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
  * Solr specific {@link PersistentEntity} implementation holding eg. name of solr core.
- *
+ * 
  * @param <T>
  * @author Christoph Strobl
  * @author Francisco Spaeth
- * @author Mark Paluch
  */
 public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, SolrPersistentProperty>
 		implements SolrPersistentEntity<T>, ApplicationContextAware {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleSolrPersistentEntity.class);
+
 	private final TypeInformation<T> typeInformation;
 	private final StandardEvaluationContext context;
-	private String collectionName;
-	private @Nullable Float boost;
+	private String solrCoreName;
+	private Float boost;
 
 	public SimpleSolrPersistentEntity(TypeInformation<T> typeInformation) {
 
 		super(typeInformation);
 		this.context = new StandardEvaluationContext();
 		this.typeInformation = typeInformation;
-		this.collectionName = derivateSolrCollectionName();
+		this.solrCoreName = derivateSolrCoreName();
 		this.boost = derivateDocumentBoost();
 	}
 
@@ -69,16 +72,18 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 		context.setRootObject(applicationContext);
 	}
 
-	private String derivateSolrCollectionName() {
+	private String derivateSolrCoreName() {
 
+		String derivativeSolrCoreName = this.typeInformation.getType().getSimpleName().toLowerCase(Locale.ENGLISH);
 		SolrDocument solrDocument = findAnnotation(SolrDocument.class);
-		if (solrDocument != null && StringUtils.hasText(solrDocument.solrCoreName())) {
-			return solrDocument.collection();
+		if (solrDocument != null) {
+			if (StringUtils.hasText(solrDocument.solrCoreName())) {
+				derivativeSolrCoreName = solrDocument.solrCoreName();
+			}
 		}
-		return this.typeInformation.getType().getSimpleName().toLowerCase(Locale.ENGLISH);
+		return derivativeSolrCoreName;
 	}
 
-	@Nullable
 	private Float derivateDocumentBoost() {
 
 		SolrDocument solrDocument = findAnnotation(SolrDocument.class);
@@ -90,11 +95,11 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.data.solr.core.mapping.SolrPersistentEntity#getCollectionName()
+	 * @see org.springframework.data.solr.core.mapping.SolrPersistentEntity#getSolrCoreName()
 	 */
 	@Override
-	public String getCollectionName() {
-		return this.collectionName;
+	public String getSolrCoreName() {
+		return this.solrCoreName;
 	}
 
 	/*
@@ -110,7 +115,6 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 	 * (non-Javadoc)
 	 * @see org.springframework.data.solr.core.mapping.SolrPersistentEntity#getBoost()
 	 */
-	@Nullable
 	@Override
 	public Float getBoost() {
 		return boost;
@@ -129,7 +133,6 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 	 * (non-Javadoc)
 	 * @see org.springframework.data.solr.core.mapping.SolrPersistentEntity#getScoreProperty()
 	 */
-	@Nullable
 	@Override
 	public SolrPersistentProperty getScoreProperty() {
 		return getPersistentProperty(Score.class);
@@ -145,6 +148,7 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 		super.verify();
 		verifyScoreFieldUniqueness();
 		verifyDynamicPropertyMapping();
+		verifyAssociations();
 	}
 
 	private void verifyScoreFieldUniqueness() {
@@ -155,17 +159,21 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 		doWithProperties(DynamicFieldMappingHandler.INSTANCE);
 	}
 
+	private void verifyAssociations() {
+		doWithProperties(AssociationFieldMappingHandler.INSTANCE);
+	}
+
 	/**
 	 * Handler to inspect {@link SolrPersistentProperty} instances and check that max one can be mapped as {@link Score}
 	 * property.
-	 *
+	 * 
 	 * @author Christpoh Strobl
 	 * @since 1.4
 	 */
 	private static class ScoreFieldUniquenessHandler implements PropertyHandler<SolrPersistentProperty> {
 
 		private static final String AMBIGUOUS_FIELD_MAPPING = "Ambiguous score field mapping detected! Both %s and %s marked as target for score value. Disambiguate using @Score annotation!";
-		private @Nullable SolrPersistentProperty scoreProperty;
+		private SolrPersistentProperty scoreProperty;
 
 		/*
 		 * (non-Javadoc)
@@ -191,11 +199,11 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 
 	/**
 	 * Handler to inspect {@link SolrPersistentProperty} instances and check usage of {@link Dynamic}.
-	 *
+	 * 
 	 * @author Christoph Strobl
 	 * @since 1.5
 	 */
-	private enum DynamicFieldMappingHandler implements PropertyHandler<SolrPersistentProperty> {
+	private static enum DynamicFieldMappingHandler implements PropertyHandler<SolrPersistentProperty> {
 
 		INSTANCE;
 
@@ -216,6 +224,28 @@ public class SimpleSolrPersistentEntity<T> extends BasicPersistentEntity<T, Solr
 					throw new MappingException(
 							String.format(DYNAMIC_PROPERTY_NOT_CONTAINING_WILDCARD, property.getName(), property.getFieldName()));
 				}
+			}
+		}
+	}
+
+	/**
+	 * Handler to inspect {@link SolrPersistentProperty} instances and check usage of {@link Dynamic}.
+	 *
+	 * @author Christoph Strobl
+	 * @since 2.1
+	 */
+	private static enum AssociationFieldMappingHandler implements PropertyHandler<SolrPersistentProperty> {
+
+		INSTANCE;
+
+		@Override
+		public void doWithPersistentProperty(SolrPersistentProperty property) {
+
+			if (property.isAnnotationPresent(Reference.class)) {
+
+				LOGGER.warn(
+						"Associations via @Reference are not supported and will be ignored by Spring Data for Apache Solr. Please check property '%s' in %s",
+						property.getName(), property.getOwner().getName());
 			}
 		}
 	}

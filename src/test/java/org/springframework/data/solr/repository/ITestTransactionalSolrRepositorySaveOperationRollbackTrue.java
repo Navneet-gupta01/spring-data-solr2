@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.springframework.data.solr.repository;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -28,15 +28,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Christoph Strobl
- * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("TransactionalSolrRepositoryTest-context.xml")
-@Transactional(transactionManager = "transactionManager")
+@Transactional
+@TransactionConfiguration(defaultRollback = true, transactionManager = "transactionManager")
 public class ITestTransactionalSolrRepositorySaveOperationRollbackTrue extends TransactionalIntegrationTestsBase {
 
 	private static final String ID = "id-tansaction-rolled-back";
@@ -67,7 +68,7 @@ public class ITestTransactionalSolrRepositorySaveOperationRollbackTrue extends T
 	public void testSaveMultipleObjects() {
 		ProductBean bean = new ProductBean();
 		bean.setId(ID);
-		repo.saveAll(Collections.singletonList(bean));
+		repo.save(Arrays.asList(bean));
 	}
 
 }

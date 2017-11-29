@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ import java.io.Closeable;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import org.springframework.lang.Nullable;
-
 /**
  * {@link Cursor} provides a lazy loading abstraction for fetching documents.
  * 
@@ -30,7 +28,7 @@ import org.springframework.lang.Nullable;
 public interface Cursor<T> extends Iterator<T>, Closeable {
 
 	enum State {
-		REDAY, OPEN, FINISHED, CLOSED
+		REDAY, OPEN, FINISHED, CLOSED;
 	}
 
 	/**
@@ -38,7 +36,6 @@ public interface Cursor<T> extends Iterator<T>, Closeable {
 	 * 
 	 * @return
 	 */
-	@Nullable
 	Serializable getCursorMark();
 
 	/**

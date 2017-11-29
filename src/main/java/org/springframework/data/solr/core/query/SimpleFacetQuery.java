@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.springframework.data.solr.core.query;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -26,7 +25,7 @@ import org.springframework.util.Assert;
  */
 public class SimpleFacetQuery extends SimpleQuery implements FacetQuery {
 
-	private @Nullable FacetOptions facetOptions;
+	private FacetOptions facetOptions;
 
 	public SimpleFacetQuery() {
 		super();
@@ -36,7 +35,7 @@ public class SimpleFacetQuery extends SimpleQuery implements FacetQuery {
 		this(criteria, null);
 	}
 
-	public SimpleFacetQuery(Criteria criteria, @Nullable Pageable pageable) {
+	public SimpleFacetQuery(Criteria criteria, Pageable pageable) {
 		super(criteria, pageable);
 	}
 
@@ -50,7 +49,6 @@ public class SimpleFacetQuery extends SimpleQuery implements FacetQuery {
 		return (T) this;
 	}
 
-	@Nullable
 	@Override
 	public FacetOptions getFacetOptions() {
 		return this.facetOptions;

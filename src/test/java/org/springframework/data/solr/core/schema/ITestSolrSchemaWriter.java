@@ -15,13 +15,14 @@
  */
 package org.springframework.data.solr.core.schema;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.IsEqual.*;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.*;
 
 import java.util.Collections;
 
 import org.apache.solr.client.solrj.SolrClient;
+import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -31,6 +32,7 @@ import org.springframework.data.solr.core.schema.SchemaDefinition.FieldDefinitio
 import org.springframework.data.solr.server.SolrClientFactory;
 import org.springframework.data.solr.server.support.HttpSolrClientFactory;
 import org.springframework.data.solr.test.util.EmbeddedSolrServer;
+import org.springframework.util.Assert;
 
 /**
  * @author Christoph Strobl
@@ -55,7 +57,7 @@ public class ITestSolrSchemaWriter {
 	public void getSchemaVersionShouldReturnVersionNumberCorrectly() {
 
 		Double version = schemaWriter.retrieveSchemaVersion("collection1");
-		assertThat(version, is(closeTo(1.6D, 0.1D)));
+		assertThat(version, equalTo(1.5D));
 	}
 
 	@Test // DATASOLR-72

@@ -18,17 +18,13 @@ package org.springframework.data.solr.repository.cdi;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Optional;
-
-import javax.enterprise.inject.se.SeContainer;
-import javax.enterprise.inject.se.SeContainerInitializer;
-
+import org.apache.webbeans.cditest.CdiTestContainer;
+import org.apache.webbeans.cditest.CdiTestContainerLoader;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.springframework.data.solr.repository.ProductBean;
 
 /**
@@ -37,35 +33,32 @@ import org.springframework.data.solr.repository.ProductBean;
  */
 public class ITestCdiRepository {
 
-	private static SeContainer cdiContainer;
+	private static CdiTestContainer cdiContainer;
 	private CdiProductRepository repository;
 	private SamplePersonRepository samplePersonRepository;
 
 	@BeforeClass
-	public static void init() {
-
-		cdiContainer = SeContainerInitializer.newInstance() //
-				.disableDiscovery() //
-				.addPackages(CdiRepositoryClient.class) //
-				.initialize();
+	public static void init() throws Exception {
+		cdiContainer = CdiTestContainerLoader.getCdiContainer();
+		cdiContainer.startApplicationScope();
+		cdiContainer.bootContainer();
 	}
 
 	@AfterClass
-	public static void shutdown() {
-		cdiContainer.close();
+	public static void shutdown() throws Exception {
+		cdiContainer.stopContexts();
+		cdiContainer.shutdownContainer();
 	}
 
 	@Before
 	public void setUp() {
-
-		CdiRepositoryClient client = cdiContainer.select(CdiRepositoryClient.class).get();
+		CdiRepositoryClient client = cdiContainer.getInstance(CdiRepositoryClient.class);
 		repository = client.getRepository();
 		samplePersonRepository = client.getSamplePersonRepository();
 	}
 
-	@Test // DATASOLR-106
+	@Test
 	public void testCdiRepository() {
-
 		Assert.assertNotNull(repository);
 
 		ProductBean bean = new ProductBean();
@@ -74,26 +67,28 @@ public class ITestCdiRepository {
 
 		repository.save(bean);
 
-		Assert.assertTrue(repository.existsById(bean.getId()));
+		Assert.assertTrue(repository.exists(bean.getId()));
 
-		Optional<ProductBean> retrieved = repository.findById(bean.getId());
-		Assert.assertTrue(retrieved.isPresent());
-		Assert.assertEquals(bean.getId(), retrieved.get().getId());
-		Assert.assertEquals(bean.getName(), retrieved.get().getName());
+		ProductBean retrieved = repository.findOne(bean.getId());
+		Assert.assertNotNull(retrieved);
+		Assert.assertEquals(bean.getId(), retrieved.getId());
+		Assert.assertEquals(bean.getName(), retrieved.getName());
 
 		Assert.assertEquals(1, repository.count());
 
-		Assert.assertTrue(repository.existsById(bean.getId()));
+		Assert.assertTrue(repository.exists(bean.getId()));
 
 		repository.delete(bean);
 
 		Assert.assertEquals(0, repository.count());
-		retrieved = repository.findById(bean.getId());
-		Assert.assertFalse(retrieved.isPresent());
+		retrieved = repository.findOne(bean.getId());
+		Assert.assertNull(retrieved);
 	}
 
 	@Test // DATASOLR-187
 	public void returnOneFromCustomImpl() {
+
 		assertThat(samplePersonRepository.returnOne(), is(1));
 	}
+
 }

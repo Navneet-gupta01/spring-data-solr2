@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.lang.Nullable;
 
 /**
  * Solr specific implementation of {@code Pageable} allowing zero sized pages.
@@ -28,7 +27,7 @@ import org.springframework.lang.Nullable;
  */
 public class SolrPageRequest implements Pageable {
 
-	private @Nullable Sort sort;
+	private Sort sort;
 	private int page;
 	private int size;
 
@@ -39,7 +38,7 @@ public class SolrPageRequest implements Pageable {
 	 * @param size the size of the page to be returned.
 	 */
 	public SolrPageRequest(int page, int size) {
-		this(page, size, Sort.unsorted());
+		this(page, size, null);
 	}
 
 	/**
@@ -61,7 +60,7 @@ public class SolrPageRequest implements Pageable {
 	 * @param size the size of the page to be returned.
 	 * @param sort can be {@literal null}.
 	 */
-	public SolrPageRequest(int page, int size, @Nullable Sort sort) {
+	public SolrPageRequest(int page, int size, Sort sort) {
 		this.page = page;
 		this.size = size;
 		this.sort = sort;
@@ -90,7 +89,7 @@ public class SolrPageRequest implements Pageable {
 	 * @see org.springframework.data.domain.Pageable#getOffset()
 	 */
 	@Override
-	public long getOffset() {
+	public int getOffset() {
 		return page * size;
 	}
 
@@ -100,7 +99,7 @@ public class SolrPageRequest implements Pageable {
 	 */
 	@Override
 	public Sort getSort() {
-		return sort != null ? sort : Sort.unsorted();
+		return sort;
 	}
 
 	/*
@@ -150,9 +149,12 @@ public class SolrPageRequest implements Pageable {
 
 	@Override
 	public int hashCode() {
-		int result = sort.hashCode();
-		result = 31 * result + page;
-		result = 31 * result + (int) (size ^ (size >>> 32));
+
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + page;
+		result = prime * result + size;
+		result = prime * result + ((sort == null) ? 0 : sort.hashCode());
 		return result;
 	}
 

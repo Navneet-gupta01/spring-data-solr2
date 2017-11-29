@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ class SolrTemplateProducer {
 				ResourceUtils.getURL("classpath:static-schema").getPath());
 
 		SolrTemplate template = new SolrTemplate(factory);
+		template.setSolrCore("collection1");
 		template.afterPropertiesSet();
 		return template;
 	}
@@ -57,11 +58,16 @@ class SolrTemplateProducer {
 		SolrOperations template;
 		try {
 			template = createSolrTemplate();
-			template.delete("collection1", new SimpleQuery(new SimpleStringCriteria("*:*")));
-			template.commit("collection1");
-		} catch (IOException | SAXException | ParserConfigurationException e) {
+			template.delete(new SimpleQuery(new SimpleStringCriteria("*:*")));
+			template.commit();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (ParserConfigurationException e) {
+			throw new RuntimeException(e);
+		} catch (SAXException e) {
 			throw new RuntimeException(e);
 		}
+
 	}
 
 }

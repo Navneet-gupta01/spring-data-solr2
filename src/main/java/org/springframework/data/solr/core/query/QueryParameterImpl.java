@@ -15,7 +15,6 @@
  */
 package org.springframework.data.solr.core.query;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -26,13 +25,13 @@ import org.springframework.util.Assert;
 public class QueryParameterImpl implements QueryParameter {
 
 	private final String name;
-	private @Nullable Object value;
+	private Object value;
 
 	/**
 	 * @param name must not be null
 	 * @param value
 	 */
-	public QueryParameterImpl(String name, @Nullable Object value) {
+	public QueryParameterImpl(String name, Object value) {
 		super();
 		Assert.notNull(name, "Name must not be null!");
 
@@ -45,7 +44,6 @@ public class QueryParameterImpl implements QueryParameter {
 		return this.name;
 	}
 
-	@Nullable
 	@Override
 	public Object getValue() {
 		return this.value;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.springframework.data.solr.repository;
 
-import static org.hamcrest.CoreMatchers.*;
-
 import java.util.Arrays;
 
 import org.apache.solr.client.solrj.beans.Field;
@@ -28,7 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.ExampleSolrBean;
 import org.springframework.data.solr.core.SolrOperations;
@@ -49,56 +47,56 @@ public class SimpleSolrRepositoryTests {
 
 	@Before
 	public void setUp() {
-		repository = new SimpleSolrRepository<>(solrOperationsMock, ExampleSolrBean.class);
+		repository = new SimpleSolrRepository<ExampleSolrBean, String>(solrOperationsMock, ExampleSolrBean.class);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInitRepositoryWithNullSolrOperations() {
-		new SimpleSolrRepository<ExampleSolrBean, String>(null, (Class) null);
+		new SimpleSolrRepository<ExampleSolrBean, String>(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInitRepositoryWithNullEntityClass() {
-		new SimpleSolrRepository<ExampleSolrBean, String>(
-				new SolrTemplate(new HttpSolrClient("http://localhost:8080/solr"), null), (Class) null);
+		new SimpleSolrRepository<ExampleSolrBean, String>(new SolrTemplate(
+				new HttpSolrClient("http://localhost:8080/solr"), null), null);
 	}
 
 	@Test
 	public void testInitRepository() {
-		repository = new SimpleSolrRepository<>(new SolrTemplate(new HttpSolrClient("http://localhost:8080/solr"), null),
-				ExampleSolrBean.class);
+		repository = new SimpleSolrRepository<ExampleSolrBean, String>(new SolrTemplate(new HttpSolrClient(
+				"http://localhost:8080/solr"), null), ExampleSolrBean.class);
 		Assert.assertEquals(ExampleSolrBean.class, repository.getEntityClass());
 	}
 
 	@Test
 	public void testFindAllByIdQuery() {
-		Mockito.when(solrOperationsMock.count(Mockito.any(), Mockito.any(SolrDataQuery.class))).thenReturn(12345l);
+		Mockito.when(solrOperationsMock.count(Mockito.any(SolrDataQuery.class))).thenReturn(12345l);
 
-		repository.findAllById(Arrays.asList("id-1", "id-2", "id-3"));
+		repository.findAll(Arrays.asList("id-1", "id-2", "id-3"));
 		ArgumentCaptor<Query> captor = ArgumentCaptor.forClass(Query.class);
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).count(Mockito.any(), captor.capture());
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(Mockito.any(), captor.capture(),
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).count(captor.capture());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(captor.capture(),
 				Mockito.eq(ExampleSolrBean.class));
 
-		Assert.assertThat(captor.getAllValues().get(0).getPageRequest().isUnpaged(), is(true));
+		Assert.assertNull(captor.getAllValues().get(0).getPageRequest());
 		Assert.assertEquals(12345, captor.getAllValues().get(1).getPageRequest().getPageSize());
 	}
 
 	@Test
 	public void testFindAllByIdQueryForBeanWithLongIdType() {
-		Mockito.when(solrOperationsMock.count(Mockito.any(), Mockito.any(SolrDataQuery.class))).thenReturn(12345l);
-		SimpleSolrRepository<BeanWithLongIdType, Long> repoWithNonStringIdType = new SimpleSolrRepository<>(
+		Mockito.when(solrOperationsMock.count(Mockito.any(SolrDataQuery.class))).thenReturn(12345l);
+		SimpleSolrRepository<BeanWithLongIdType, Long> repoWithNonStringIdType = new SimpleSolrRepository<BeanWithLongIdType, Long>(
 				solrOperationsMock, BeanWithLongIdType.class);
 
-		repoWithNonStringIdType.findAllById(Arrays.asList(1L, 2L, 3L));
+		repoWithNonStringIdType.findAll(Arrays.asList(1L, 2L, 3L));
 		ArgumentCaptor<Query> captor = ArgumentCaptor.forClass(Query.class);
 
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).count(Mockito.any(), captor.capture());
-		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(Mockito.any(), captor.capture(),
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).count(captor.capture());
+		Mockito.verify(solrOperationsMock, Mockito.times(1)).queryForPage(captor.capture(),
 				Mockito.eq(BeanWithLongIdType.class));
 
-		Assert.assertThat(captor.getAllValues().get(0).getPageRequest().isUnpaged(), is(true));
+		Assert.assertNull(captor.getAllValues().get(0).getPageRequest());
 		Assert.assertEquals(12345, captor.getAllValues().get(1).getPageRequest().getPageSize());
 	}
 

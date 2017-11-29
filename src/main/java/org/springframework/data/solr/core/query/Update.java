@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.data.solr.core.query;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Update one or more fields of a Document without touching the others.
@@ -43,7 +41,6 @@ public interface Update {
 	 * 
 	 * @return
 	 */
-	@Nullable
 	Object getVersion();
 
 }

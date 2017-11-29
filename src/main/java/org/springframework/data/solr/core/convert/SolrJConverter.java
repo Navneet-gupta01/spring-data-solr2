@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentBase;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.springframework.data.mapping.context.MappingContext;
@@ -30,7 +29,6 @@ import org.springframework.data.solr.core.mapping.SimpleSolrMappingContext;
 import org.springframework.data.solr.core.mapping.SolrPersistentEntity;
 import org.springframework.data.solr.core.mapping.SolrPersistentProperty;
 import org.springframework.data.solr.core.query.Update;
-import org.springframework.lang.Nullable;
 
 /**
  * Trivial implementation of {@link SolrConverter} delegating conversion to {@link DocumentObjectBinder}
@@ -52,13 +50,13 @@ public class SolrJConverter extends SolrConverterBase implements SolrConverter {
 	}
 
 	@Override
-	public <S, R> List<R> read(@Nullable SolrDocumentList source, Class<R> type) {
+	public <S, R> List<R> read(SolrDocumentList source, Class<R> type) {
 		if (source == null) {
 			return Collections.emptyList();
 		}
 
-		List<R> resultList = new ArrayList<>(source.size());
-		for (SolrDocumentBase item : source) {
+		List<R> resultList = new ArrayList<R>(source.size());
+		for (Map<String, ?> item : source) {
 			resultList.add(read(type, item));
 		}
 
@@ -66,7 +64,7 @@ public class SolrJConverter extends SolrConverterBase implements SolrConverter {
 	}
 
 	@Override
-	public <R> R read(Class<R> type, SolrDocumentBase source) {
+	public <R> R read(Class<R> type, Map<String, ?> source) {
 		if (!canConvert(SolrDocument.class, type)) {
 			initializeTypedConverter(source, type);
 		}
@@ -75,17 +73,16 @@ public class SolrJConverter extends SolrConverterBase implements SolrConverter {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void write(@Nullable Object source, SolrDocumentBase sink) {
+	public void write(Object source, Map sink) {
 		if (source == null) {
 			return;
 		}
 
 		SolrInputDocument convertedDocument = convert(source, SolrInputDocument.class);
-		sink.putAll(convertedDocument);
-
 		if (convertedDocument.hasChildDocuments() && sink instanceof SolrInputDocument) {
 			((SolrInputDocument) sink).addChildDocuments(convertedDocument.getChildDocuments());
 		}
+		sink.putAll(convertedDocument);
 	}
 
 	private void initializeConverters() {
@@ -93,15 +90,15 @@ public class SolrJConverter extends SolrConverterBase implements SolrConverter {
 			getConversionService().addConverter(new SolrjConverters.UpdateToSolrInputDocumentConverter());
 		}
 		if (!canConvert(Object.class, SolrInputDocument.class)) {
-			getConversionService()
-					.addConverter(new SolrjConverters.ObjectToSolrInputDocumentConverter(new DocumentObjectBinder()));
+			getConversionService().addConverter(
+					new SolrjConverters.ObjectToSolrInputDocumentConverter(new DocumentObjectBinder()));
 		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private <S> void initializeTypedConverter(Map<String, ?> source, Class<? extends S> rawType) {
 		getConversionService().addConverter((Class) source.getClass(), (Class) rawType,
-				new SolrjConverters.SolrInputDocumentToObjectConverter<>((Class<S>) rawType));
+				new SolrjConverters.SolrInputDocumentToObjectConverter<S>((Class<S>) rawType));
 	}
 
 }

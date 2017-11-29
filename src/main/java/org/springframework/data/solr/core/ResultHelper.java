@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,16 +44,33 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mapping.MappingException;
+import org.springframework.data.mapping.model.MappingException;
 import org.springframework.data.repository.util.ClassUtils;
+import org.springframework.data.solr.VersionUtil;
 import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.Field;
 import org.springframework.data.solr.core.query.Query;
 import org.springframework.data.solr.core.query.SimpleField;
 import org.springframework.data.solr.core.query.SimplePivotField;
-import org.springframework.data.solr.core.query.result.*;
+import org.springframework.data.solr.core.query.result.FacetFieldEntry;
+import org.springframework.data.solr.core.query.result.FacetPivotFieldEntry;
+import org.springframework.data.solr.core.query.result.FacetQueryEntry;
+import org.springframework.data.solr.core.query.result.FieldStatsResult;
+import org.springframework.data.solr.core.query.result.GroupEntry;
+import org.springframework.data.solr.core.query.result.GroupResult;
+import org.springframework.data.solr.core.query.result.HighlightEntry;
+import org.springframework.data.solr.core.query.result.SimpleFacetFieldEntry;
+import org.springframework.data.solr.core.query.result.SimpleFacetPivotEntry;
+import org.springframework.data.solr.core.query.result.SimpleFacetQueryEntry;
+import org.springframework.data.solr.core.query.result.SimpleFieldStatsResult;
+import org.springframework.data.solr.core.query.result.SimpleGroupEntry;
+import org.springframework.data.solr.core.query.result.SimpleGroupResult;
+import org.springframework.data.solr.core.query.result.SimpleStatsResult;
+import org.springframework.data.solr.core.query.result.SimpleTermsFieldEntry;
+import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.data.solr.core.query.result.SpellcheckQueryResult.Alternative;
-import org.springframework.lang.Nullable;
+import org.springframework.data.solr.core.query.result.StatsResult;
+import org.springframework.data.solr.core.query.result.TermsFieldEntry;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -61,7 +78,7 @@ import org.springframework.util.StringUtils;
 /**
  * Use Result Helper to extract various parameters from the QueryResponse and convert it into a proper Format taking
  * care of non existent and null elements with the response.
- *
+ * 
  * @author Christoph Strobl
  * @author Francisco Spaeth
  * @author Venil Noronha
@@ -70,16 +87,17 @@ final class ResultHelper {
 
 	private ResultHelper() {}
 
-	static Map<String, List<TermsFieldEntry>> convertTermsQueryResponseToTermsMap(@Nullable QueryResponse response) {
+	static Map<String, List<TermsFieldEntry>> convertTermsQueryResponseToTermsMap(QueryResponse response) {
 		if (response == null || response.getTermsResponse() == null || response.getTermsResponse().getTermMap() == null) {
 			return Collections.emptyMap();
 		}
 
 		TermsResponse termsResponse = response.getTermsResponse();
-		Map<String, List<TermsFieldEntry>> result = new LinkedHashMap<>(termsResponse.getTermMap().size());
+		Map<String, List<TermsFieldEntry>> result = new LinkedHashMap<String, List<TermsFieldEntry>>(
+				termsResponse.getTermMap().size());
 
 		for (Map.Entry<String, List<Term>> entry : termsResponse.getTermMap().entrySet()) {
-			List<TermsFieldEntry> terms = new ArrayList<>(entry.getValue().size());
+			List<TermsFieldEntry> terms = new ArrayList<TermsFieldEntry>(entry.getValue().size());
 			for (Term term : entry.getValue()) {
 				SimpleTermsFieldEntry termsEntry = new SimpleTermsFieldEntry(term.getTerm(), term.getFrequency());
 				termsEntry.setField(entry.getKey());
@@ -98,7 +116,7 @@ final class ResultHelper {
 		if (!hasFacets(query, response)) {
 			return Collections.emptyMap();
 		}
-		Map<Field, Page<FacetFieldEntry>> facetResult = new LinkedHashMap<>();
+		Map<Field, Page<FacetFieldEntry>> facetResult = new LinkedHashMap<Field, Page<FacetFieldEntry>>();
 
 		if (!CollectionUtils.isEmpty(response.getFacetFields())) {
 			int initalPageSize = Math.max(1, query.getFacetOptions().getPageable().getPageSize());
@@ -106,16 +124,16 @@ final class ResultHelper {
 				if (facetField != null && StringUtils.hasText(facetField.getName())) {
 					Field field = new SimpleField(facetField.getName());
 					if (!CollectionUtils.isEmpty(facetField.getValues())) {
-						List<FacetFieldEntry> pageEntries = new ArrayList<>(initalPageSize);
+						List<FacetFieldEntry> pageEntries = new ArrayList<FacetFieldEntry>(initalPageSize);
 						for (Count count : facetField.getValues()) {
 							if (count != null) {
 								pageEntries.add(new SimpleFacetFieldEntry(field, count.getName(), count.getCount()));
 							}
 						}
-						facetResult.put(field, new SolrResultPage<>(pageEntries, query.getFacetOptions().getPageable(),
-								facetField.getValueCount(), null));
+						facetResult.put(field, new SolrResultPage<FacetFieldEntry>(pageEntries,
+								query.getFacetOptions().getPageable(), facetField.getValueCount(), null));
 					} else {
-						facetResult.put(field, new SolrResultPage<>(Collections.<FacetFieldEntry> emptyList(),
+						facetResult.put(field, new SolrResultPage<FacetFieldEntry>(Collections.<FacetFieldEntry> emptyList(),
 								query.getFacetOptions().getPageable(), 0, null));
 					}
 				}
@@ -127,7 +145,12 @@ final class ResultHelper {
 	static Map<org.springframework.data.solr.core.query.PivotField, List<FacetPivotFieldEntry>> convertFacetQueryResponseToFacetPivotMap(
 			FacetQuery query, QueryResponse response) {
 
-		Map<org.springframework.data.solr.core.query.PivotField, List<FacetPivotFieldEntry>> facetResult = new LinkedHashMap<>();
+		if (VersionUtil.isSolr3XAvailable()) {
+			// pivot facets are a solr 4+ Feature
+			return Collections.emptyMap();
+		}
+
+		Map<org.springframework.data.solr.core.query.PivotField, List<FacetPivotFieldEntry>> facetResult = new LinkedHashMap<org.springframework.data.solr.core.query.PivotField, List<FacetPivotFieldEntry>>();
 		NamedList<List<PivotField>> facetPivot = response.getFacetPivot();
 		if (facetPivot != null && facetPivot.size() > 0) {
 			for (int i = 0; i < facetPivot.size(); i++) {
@@ -145,7 +168,7 @@ final class ResultHelper {
 			return Collections.emptyList();
 		}
 
-		ArrayList<FacetPivotFieldEntry> pivotFieldEntries = new ArrayList<>();
+		ArrayList<FacetPivotFieldEntry> pivotFieldEntries = new ArrayList<FacetPivotFieldEntry>();
 
 		for (PivotField pivotField : pivotResult) {
 			SimpleFacetPivotEntry pivotFieldEntry = new SimpleFacetPivotEntry(new SimpleField(pivotField.getField()),
@@ -175,7 +198,7 @@ final class ResultHelper {
 		if (!hasFacets(query, response) || CollectionUtils.isEmpty(response.getFacetRanges())) {
 			return Collections.emptyMap();
 		}
-		Map<Field, Page<FacetFieldEntry>> facetResult = new LinkedHashMap<>();
+		Map<Field, Page<FacetFieldEntry>> facetResult = new LinkedHashMap<Field, Page<FacetFieldEntry>>();
 
 		Pageable pageable = query.getFacetOptions().getPageable();
 		int initalPageSize = pageable.getPageSize();
@@ -190,7 +213,7 @@ final class ResultHelper {
 			List<FacetFieldEntry> entries;
 			long total;
 			if (!CollectionUtils.isEmpty(rangeFacet.getCounts())) {
-				entries = new ArrayList<>(initalPageSize);
+				entries = new ArrayList<FacetFieldEntry>(initalPageSize);
 				for (RangeFacet.Count count : rangeFacet.getCounts()) {
 					entries.add(new SimpleFacetFieldEntry(field, count.getValue(), count.getCount()));
 				}
@@ -200,7 +223,7 @@ final class ResultHelper {
 				total = 0;
 			}
 
-			facetResult.put(field, new SolrResultPage<>(entries, pageable, total, null));
+			facetResult.put(field, new SolrResultPage<FacetFieldEntry>(entries, pageable, total, null));
 
 		}
 
@@ -214,7 +237,7 @@ final class ResultHelper {
 			return Collections.emptyList();
 		}
 
-		List<FacetQueryEntry> facetResult = new ArrayList<>();
+		List<FacetQueryEntry> facetResult = new ArrayList<FacetQueryEntry>();
 
 		if (!CollectionUtils.isEmpty(response.getFacetQuery())) {
 			for (Entry<String, Integer> entry : response.getFacetQuery().entrySet()) {
@@ -224,13 +247,13 @@ final class ResultHelper {
 		return facetResult;
 	}
 
-	static <T> List<HighlightEntry<T>> convertAndAddHighlightQueryResponseToResultPage(@Nullable QueryResponse response,
-			@Nullable SolrResultPage<T> page) {
+	static <T> List<HighlightEntry<T>> convertAndAddHighlightQueryResponseToResultPage(QueryResponse response,
+			SolrResultPage<T> page) {
 		if (response == null || CollectionUtils.isEmpty(response.getHighlighting()) || page == null) {
 			return Collections.emptyList();
 		}
 
-		List<HighlightEntry<T>> mappedHighlights = new ArrayList<>(page.getSize());
+		List<HighlightEntry<T>> mappedHighlights = new ArrayList<HighlightEntry<T>>(page.getSize());
 		Map<String, Map<String, List<String>>> highlighting = response.getHighlighting();
 
 		for (T item : page) {
@@ -243,7 +266,7 @@ final class ResultHelper {
 
 	private static <T> HighlightEntry<T> processHighlightingForPageEntry(
 			Map<String, Map<String, List<String>>> highlighting, T pageEntry) {
-		HighlightEntry<T> highlightEntry = new HighlightEntry<>(pageEntry);
+		HighlightEntry<T> highlightEntry = new HighlightEntry<T>(pageEntry);
 		Object itemId = getMappedId(pageEntry);
 
 		Map<String, List<String>> highlights = highlighting.get(itemId.toString());
@@ -269,7 +292,9 @@ final class ResultHelper {
 			if (annotation != null) {
 				try {
 					return FieldUtils.readField(field, o, true);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
+				} catch (IllegalArgumentException e) {
+					throw new MappingException("Id property could not be accessed!", e);
+				} catch (IllegalAccessException e) {
 					throw new MappingException("Id property could not be accessed!", e);
 				}
 			}
@@ -290,19 +315,19 @@ final class ResultHelper {
 			return Collections.emptyMap();
 		}
 
-		Map<Object, GroupResult<T>> result = new LinkedHashMap<>();
+		Map<Object, GroupResult<T>> result = new LinkedHashMap<Object, GroupResult<T>>();
 
 		List<GroupCommand> values = groupResponse.getValues();
 		for (GroupCommand groupCommand : values) {
 
-			List<GroupEntry<T>> groupEntries = new ArrayList<>();
+			List<GroupEntry<T>> groupEntries = new ArrayList<GroupEntry<T>>();
 
 			for (Group group : groupCommand.getValues()) {
 
 				SolrDocumentList documentList = group.getResult();
 				List<T> beans = solrTemplate.convertSolrDocumentListToBeans(documentList, clazz);
-				Page<T> page = new PageImpl<>(beans, query.getGroupOptions().getPageRequest(), documentList.getNumFound());
-				groupEntries.add(new SimpleGroupEntry<>(group.getGroupValue(), page));
+				Page<T> page = new PageImpl<T>(beans, query.getGroupOptions().getPageRequest(), documentList.getNumFound());
+				groupEntries.add(new SimpleGroupEntry<T>(group.getGroupValue(), page));
 			}
 
 			int matches = groupCommand.getMatches();
@@ -311,12 +336,12 @@ final class ResultHelper {
 
 			PageImpl<GroupEntry<T>> page;
 			if (ngroups != null) {
-				page = new PageImpl<>(groupEntries, query.getPageRequest(), ngroups);
+				page = new PageImpl<GroupEntry<T>>(groupEntries, query.getPageRequest(), ngroups.intValue());
 			} else {
-				page = new PageImpl<>(groupEntries);
+				page = new PageImpl<GroupEntry<T>>(groupEntries);
 			}
 
-			SimpleGroupResult<T> groupResult = new SimpleGroupResult<>(matches, ngroups, name, page);
+			SimpleGroupResult<T> groupResult = new SimpleGroupResult<T>(matches, ngroups, name, page);
 			result.put(name, groupResult);
 			if (objectNames.containsKey(name)) {
 				result.put(objectNames.get(name), groupResult);
@@ -333,7 +358,7 @@ final class ResultHelper {
 			return Collections.emptyMap();
 		}
 
-		Map<String, FieldStatsResult> result = new LinkedHashMap<>();
+		Map<String, FieldStatsResult> result = new LinkedHashMap<String, FieldStatsResult>();
 		for (Entry<String, FieldStatsInfo> entry : fieldStatsInfo.entrySet()) {
 
 			FieldStatsInfo value = entry.getValue();
@@ -363,10 +388,10 @@ final class ResultHelper {
 	private static Map<String, Map<String, StatsResult>> convertFieldStatsInfoToStatsResultMap(
 			Map<String, List<FieldStatsInfo>> statsInfo) {
 
-		Map<String, Map<String, StatsResult>> result = new LinkedHashMap<>();
+		Map<String, Map<String, StatsResult>> result = new LinkedHashMap<String, Map<String, StatsResult>>();
 
 		for (Entry<String, List<FieldStatsInfo>> entry : statsInfo.entrySet()) {
-			Map<String, StatsResult> facetStatsValues = new LinkedHashMap<>();
+			Map<String, StatsResult> facetStatsValues = new LinkedHashMap<String, StatsResult>();
 
 			for (FieldStatsInfo fieldStatsInfo : entry.getValue()) {
 
@@ -389,8 +414,16 @@ final class ResultHelper {
 		statsResult.setMissing(value.getMissing());
 		statsResult.setStddev(value.getStddev());
 		statsResult.setSumOfSquares((Double) new DirectFieldAccessor(value).getPropertyValue("sumOfSquares"));
-		statsResult.setMean(value.getMean());
-		statsResult.setSum(value.getSum());
+
+		Object mean = value.getMean();
+		if (mean instanceof Double) {
+			statsResult.setMean((Double) mean);
+		}
+
+		Object sum = value.getSum();
+		if (sum instanceof Double) {
+			statsResult.setSum((Double) sum);
+		}
 
 		return statsResult;
 	}
@@ -402,12 +435,12 @@ final class ResultHelper {
 			return Collections.emptyMap();
 		}
 
-		Map<String, List<Alternative>> alternativesMap = new LinkedHashMap<>();
+		Map<String, List<Alternative>> alternativesMap = new LinkedHashMap<String, List<Alternative>>();
 		SpellCheckResponse scr = response.getSpellCheckResponse();
 		if (scr != null && scr.getSuggestions() != null) {
 			for (SpellCheckResponse.Suggestion suggestion : scr.getSuggestions()) {
 
-				List<Alternative> alternatives = new ArrayList<>();
+				List<Alternative> alternatives = new ArrayList<Alternative>();
 
 				if (!CollectionUtils.isEmpty(suggestion.getAlternatives())) {
 					for (int i = 0; i < suggestion.getAlternatives().size(); i++) {

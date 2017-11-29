@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.solr.common.params.SpellingParams;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link SpellcheckOptions} allows modification of query parameters targeting the SpellCheck component is designed to
@@ -32,13 +31,13 @@ import org.springframework.lang.Nullable;
  */
 public class SpellcheckOptions {
 
-	private @Nullable Query query;
+	private Query query;
 	private Map<String, Object> params;
 
-	private SpellcheckOptions(@Nullable Query query, Map<String, Object> params) {
+	private SpellcheckOptions(Query query, Map<String, Object> params) {
 
 		this.query = query;
-		this.params = new LinkedHashMap<>(params);
+		this.params = new LinkedHashMap<String, Object>(params);
 	}
 
 	/**
@@ -47,7 +46,7 @@ public class SpellcheckOptions {
 	 * @return
 	 */
 	public static SpellcheckOptions spellcheck() {
-		return new SpellcheckOptions(null, new LinkedHashMap<>());
+		return new SpellcheckOptions(null, new LinkedHashMap<String, Object>());
 	}
 
 	/**
@@ -57,7 +56,7 @@ public class SpellcheckOptions {
 	 * @return
 	 */
 	public static SpellcheckOptions spellcheck(Query q) {
-		return new SpellcheckOptions(q, new LinkedHashMap<>());
+		return new SpellcheckOptions(q, new LinkedHashMap<String, Object>());
 	}
 
 	/**
@@ -65,7 +64,6 @@ public class SpellcheckOptions {
 	 *
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Query getQuery() {
 		return query;
 	}
@@ -125,7 +123,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Long getMaxCollations() {
 		return (Long) params.get(SpellingParams.SPELLCHECK_MAX_COLLATIONS);
 	}
@@ -143,7 +140,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Long getMaxCollationTries() {
 		return (Long) params.get(SpellingParams.SPELLCHECK_MAX_COLLATION_TRIES);
 	}
@@ -162,7 +158,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Long getMaxCollationEvaluations() {
 		return (Long) params.get(SpellingParams.SPELLCHECK_MAX_COLLATION_EVALUATIONS);
 	}
@@ -180,7 +175,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Boolean getExtendedResults() {
 		return (Boolean) params.get(SpellingParams.SPELLCHECK_EXTENDED_RESULTS);
 	}
@@ -216,7 +210,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Long getMaxCollationCollectDocs() {
 		return (Long) params.get(SpellingParams.SPELLCHECK_COLLATE_MAX_COLLECT_DOCS);
 	}
@@ -238,7 +231,7 @@ public class SpellcheckOptions {
 	 */
 	public Map<String, Object> getCollateParams() {
 
-		Map<String, Object> tmp = new LinkedHashMap<>();
+		Map<String, Object> tmp = new LinkedHashMap<String, Object>();
 
 		for (Entry<String, Object> entry : params.entrySet()) {
 			if (entry.getKey().startsWith(SpellingParams.SPELLCHECK_COLLATE_PARAM_OVERRIDE)) {
@@ -261,7 +254,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Long getCount() {
 		return (Long) params.get(SpellingParams.SPELLCHECK_COUNT);
 	}
@@ -270,6 +262,7 @@ public class SpellcheckOptions {
 	 * This parameter causes Solr to use the dictionary named in the parameter's argument. The default setting is
 	 * "default". This parameter can be used to invoke a specific spellchecker on a per request basis.
 	 *
+	 * @param name
 	 * @return
 	 */
 	public SpellcheckOptions dictionaries(String... names) {
@@ -279,7 +272,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public String[] getDictionary() {
 		return (String[]) params.get(SpellingParams.SPELLCHECK_DICT);
 	}
@@ -315,7 +307,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Long getMaxResultsForSuggest() {
 		return (Long) params.get(SpellingParams.SPELLCHECK_MAX_RESULTS_FOR_SUGGEST);
 	}
@@ -333,7 +324,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Long getAlternativeTermCount() {
 		return (Long) params.get(SpellingParams.SPELLCHECK_ALTERNATIVE_TERM_COUNT);
 	}
@@ -352,7 +342,6 @@ public class SpellcheckOptions {
 	/**
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
 	public Float getAccuracy() {
 		return (Float) params.get(SpellingParams.SPELLCHECK_ACCURACY);
 	}

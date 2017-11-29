@@ -31,7 +31,6 @@ import org.springframework.data.solr.AbstractITestWithEmbeddedSolrServer;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.schema.SolrPersistentEntitySchemaCreator.Feature;
 import org.springframework.data.solr.repository.support.SimpleSolrRepository;
-import org.springframework.data.solr.server.SolrClientFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -45,12 +44,12 @@ public class ITestEnableSolrRepositoriesWithSchemaCreationSupport extends Abstra
 	@Autowired ApplicationContext context;
 
 	@Configuration
-	@EnableSolrRepositories(schemaCreationSupport = true)
-	static class Config extends AbstractSolrConfiguration {
+	@EnableSolrRepositories(schemaCreationSupport = true, multicoreSupport = true)
+	static class Config {
 
-		@Override
-		public SolrClientFactory solrClientFactory() {
-			return server;
+		@Bean
+		public SolrClient solrClient() {
+			return server.getSolrClient("collection1");
 		}
 	}
 

@@ -28,7 +28,6 @@ import org.springframework.data.convert.WritingConverter;
 import org.springframework.data.solr.core.query.Update;
 import org.springframework.data.solr.core.query.UpdateField;
 import org.springframework.data.solr.core.query.ValueHoldingField;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -45,7 +44,7 @@ final class SolrjConverters {
 	abstract static class DocumentBinderConverter {
 		protected final DocumentObjectBinder documentObjectBinder;
 
-		public DocumentBinderConverter(@Nullable DocumentObjectBinder binder) {
+		public DocumentBinderConverter(DocumentObjectBinder binder) {
 			this.documentObjectBinder = binder != null ? binder : new DocumentObjectBinder();
 		}
 
@@ -57,15 +56,14 @@ final class SolrjConverters {
 	 * @author Christoph Strobl
 	 */
 	@WritingConverter
-	public static class ObjectToSolrInputDocumentConverter extends DocumentBinderConverter
-			implements Converter<Object, SolrInputDocument> {
+	public static class ObjectToSolrInputDocumentConverter extends DocumentBinderConverter implements Converter<Object, SolrInputDocument> {
 
 		public ObjectToSolrInputDocumentConverter(DocumentObjectBinder binder) {
 			super(binder);
 		}
 
 		@Override
-		public SolrInputDocument convert(@Nullable Object source) {
+		public SolrInputDocument convert(Object source) {
 			if (source == null) {
 				return null;
 			}
@@ -78,6 +76,7 @@ final class SolrjConverters {
 	 * Converts any {@link Update} to {@link SolrInputDocument} for atomic update.
 	 * 
 	 * @author Christoph Strobl
+	 * 
 	 */
 	@WritingConverter
 	public static class UpdateToSolrInputDocumentConverter implements Converter<Update, SolrInputDocument> {
@@ -89,7 +88,7 @@ final class SolrjConverters {
 		}
 
 		@Override
-		public SolrInputDocument convert(@Nullable Update source) {
+		public SolrInputDocument convert(Update source) {
 			if (source == null) {
 				return null;
 			}
@@ -103,7 +102,7 @@ final class SolrjConverters {
 			}
 
 			for (UpdateField field : source.getUpdates()) {
-				HashMap<String, Object> mapValue = new HashMap<>(1);
+				HashMap<String, Object> mapValue = new HashMap<String, Object>(1);
 				mapValue.put(field.getAction().getSolrOperation(), getUpdateValue(field));
 				solrInputDocument.addField(field.getName(), mapValue);
 			}
@@ -111,10 +110,9 @@ final class SolrjConverters {
 			return solrInputDocument;
 		}
 
-		@Nullable
 		private Object getUpdateValue(ValueHoldingField field) {
-			// Solr removes all values from document in case of empty colleciton
-			// therefore those values have to be set to null.
+			//Solr removes all values from document in case of empty colleciton
+			//therefore those values have to be set to null.
 			if (field.getValue() instanceof Collection) {
 				if (((Collection<?>) field.getValue()).isEmpty()) {
 					return null;
@@ -130,11 +128,11 @@ final class SolrjConverters {
 	 * Convert any {@link SolrDocument} to object of given {@link Class} using {@link DocumentObjectBinder}
 	 * 
 	 * @author Christoph Strobl
+	 * 
 	 * @param <T>
 	 */
 	@ReadingConverter
-	public static class SolrInputDocumentToObjectConverter<T> extends DocumentBinderConverter
-			implements Converter<Map<String, ?>, T> {
+	public static class SolrInputDocumentToObjectConverter<T> extends DocumentBinderConverter implements Converter<Map<String, ?>, T> {
 
 		private Class<T> clazz;
 
@@ -152,9 +150,9 @@ final class SolrjConverters {
 			if (source == null) {
 				return null;
 			}
-
 			SolrDocument document = new SolrDocument();
 			document.putAll(source);
+
 			if (source instanceof SolrDocument && ((SolrDocument) source).hasChildDocuments()) {
 				document.addChildDocuments(((SolrDocument) source).getChildDocuments());
 			}

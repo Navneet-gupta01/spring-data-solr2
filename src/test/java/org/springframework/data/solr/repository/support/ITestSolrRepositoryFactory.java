@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2017 the original author or authors.
+ * Copyright 2012 - 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class ITestSolrRepositoryFactory extends AbstractITestWithEmbeddedSolrSer
 
 	@Before
 	public void setUp() {
-		SolrTemplate template = new SolrTemplate(server);
+		SolrTemplate template = new SolrTemplate(server, "collection1");
 		template.afterPropertiesSet();
 		factory = new SolrRepositoryFactory(template);
 	}
@@ -70,19 +70,19 @@ public class ITestSolrRepositoryFactory extends AbstractITestWithEmbeddedSolrSer
 		repository.save(initial);
 		Assert.assertEquals(1, repository.count());
 
-		ProductBean loaded = repository.findById(initial.getId()).get();
+		ProductBean loaded = repository.findOne(initial.getId());
 		Assert.assertEquals(initial.getName(), loaded.getName());
 
 		loaded.setName("name changed");
 		repository.save(loaded);
 		Assert.assertEquals(1, repository.count());
 
-		loaded = repository.findById(initial.getId()).get();
+		loaded = repository.findOne(initial.getId());
 		Assert.assertEquals("name changed", loaded.getName());
 
 		repository.delete(loaded);
 
-		Thread.sleep(200);
+		Thread.sleep(100);
 		Assert.assertEquals(0, repository.count());
 	}
 
@@ -117,7 +117,7 @@ public class ITestSolrRepositoryFactory extends AbstractITestWithEmbeddedSolrSer
 
 		ProductBeanRepository repository = factory.getRepository(ProductBeanRepository.class);
 
-		repository.saveAll(Arrays.asList(availableProduct, unavailableProduct));
+		repository.save(Arrays.asList(availableProduct, unavailableProduct));
 		Assert.assertEquals(2, repository.count());
 
 		Page<ProductBean> result = repository.findByAvailableTrue(new PageRequest(0, 10));
@@ -133,7 +133,7 @@ public class ITestSolrRepositoryFactory extends AbstractITestWithEmbeddedSolrSer
 
 		ProductBeanRepository repository = factory.getRepository(ProductBeanRepository.class);
 
-		repository.saveAll(Arrays.asList(availableProduct, unavailableProduct));
+		repository.save(Arrays.asList(availableProduct, unavailableProduct));
 		Assert.assertEquals(2, repository.count());
 
 		List<ProductBean> result = repository.findByAvailableTrue();

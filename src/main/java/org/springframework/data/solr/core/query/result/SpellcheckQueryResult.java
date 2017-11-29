@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,41 +63,11 @@ public interface SpellcheckQueryResult {
 	 * @since 2.1
 	 */
 	@Data
-	class Alternative {
+	public static class Alternative {
 
 		private final String term;
 		private final int termFrequency;
 		private final String suggestion;
 		private final int suggestionFrequency;
-		
-		
-		public Alternative(String term, int termFrequency, String suggestion, int suggestionFrequency) {
-			super();
-			this.term = term;
-			this.termFrequency = termFrequency;
-			this.suggestion = suggestion;
-			this.suggestionFrequency = suggestionFrequency;
-		}
-
-
-		public String getTerm() {
-			return term;
-		}
-
-
-		public int getTermFrequency() {
-			return termFrequency;
-		}
-
-
-		public String getSuggestion() {
-			return suggestion;
-		}
-
-
-		public int getSuggestionFrequency() {
-			return suggestionFrequency;
-		}
-		
 	}
 }

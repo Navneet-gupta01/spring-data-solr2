@@ -122,6 +122,12 @@ public abstract class AbstractQueryDecorator implements Query {
 	public Integer getTimeAllowed() {
 		return this.query.getTimeAllowed();
 	}
+	
+	@Nullable
+	@Override
+	public String getRqqValue() {
+		return this.query.getRqqValue();
+	}
 
 	@Override
 	public void setDefaultOperator(Operator operator) {
@@ -156,6 +162,11 @@ public abstract class AbstractQueryDecorator implements Query {
 	@Override
 	public <T extends Query> T setOffset(Long offset) {
 		return this.query.setOffset(offset);
+	}
+	
+	@Override
+	public <T extends Query> T setReRank(String rqqValue) {
+		return this.query.setReRank(rqqValue);
 	}
 
 	@Override

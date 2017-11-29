@@ -45,6 +45,8 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 
 	private @Nullable Operator defaultOperator;
 	private @Nullable Integer timeAllowed;
+	private @Nullable String rqqValue;
+	
 	private @Nullable String defType;
 
 	private @Nullable GroupOptions groupOptions;
@@ -393,5 +395,17 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	@Override
 	public SpellcheckOptions getSpellcheckOptions() {
 		return this.spellcheckOptions;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Query> T setReRank(String rqqValue) {
+		this.rqqValue=rqqValue;
+		return (T) this;
+	}
+
+	@Override
+	public String getRqqValue() {
+		return this.rqqValue;
 	}
 }

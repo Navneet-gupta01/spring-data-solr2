@@ -132,7 +132,7 @@ public class SolrQueryMethod extends QueryMethod {
 	}
 	
 	/**
-	 * @return null if {@link Query#timeAllowed()} is null or negative
+	 * @return null if {@link Query#rqqValue()} is null or blank
 	 */
 	@Nullable
 	public String getRqqValue() {

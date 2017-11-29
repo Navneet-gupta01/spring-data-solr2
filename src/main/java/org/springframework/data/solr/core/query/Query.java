@@ -80,6 +80,15 @@ public interface Query extends SolrDataQuery {
 	 * @since 1.3
 	 */
 	<T extends Query> T setOffset(Long offset);
+	
+	/**
+	 * Set the rerank value.
+	 * 
+	 * @param offset
+	 * @return
+	 * @since 1.3
+	 */
+	<T extends Query> T setReRank(String rqqValue);
 
 	/**
 	 * Set the number of rows to fetch.
@@ -182,6 +191,15 @@ public interface Query extends SolrDataQuery {
 	 */
 	@Nullable
 	Integer getTimeAllowed();
+	
+	/**
+	 * Return the time (in milliseconds) allowed for a search to finish
+	 * 
+	 * @return
+	 */
+	@Nullable
+	String getRqqValue();
+
 
 	/**
 	 * Set the default operator {@code q.op} for query expressions

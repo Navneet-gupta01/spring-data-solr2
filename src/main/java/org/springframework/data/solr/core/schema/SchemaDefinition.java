@@ -151,10 +151,6 @@ public class SchemaDefinition {
 		private boolean multiValued;
 		private boolean required;
 
-		public FieldDefinition() {
-			super();
-		}
-
 		public FieldDefinition(String name) {
 			this.name = name;
 		}

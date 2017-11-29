@@ -35,6 +35,7 @@ import org.springframework.data.solr.repository.Facet;
 import org.springframework.data.solr.repository.Highlight;
 import org.springframework.data.solr.repository.Pivot;
 import org.springframework.data.solr.repository.Query;
+import org.springframework.data.solr.repository.Rerank;
 import org.springframework.data.solr.repository.SelectiveStats;
 import org.springframework.data.solr.repository.Spellcheck;
 import org.springframework.data.solr.repository.Stats;
@@ -122,6 +123,16 @@ public class SolrQueryMethod extends QueryMethod {
 	public Integer getTimeAllowed() {
 		if (hasQueryAnnotation()) {
 			return getAnnotationValueAsIntOrNullIfNegative(getQueryAnnotation(), "timeAllowed");
+		}
+		return null;
+	}
+	
+	/**
+	 * @return null if {@link Query#rqqValue()} is null or blank
+	 */
+	public String getRqqValue() {
+		if (hasQueryAnnotation()) {
+			return getAnnotationValueAsStringOrNullIfBlank(getQueryAnnotation(), "rqqValue");
 		}
 		return null;
 	}
@@ -217,6 +228,50 @@ public class SolrQueryMethod extends QueryMethod {
 		return getAnnotationValueAsStringOrNullIfBlank(getFacetAnnotation(), "prefix");
 	}
 
+	
+	
+	// Rerank Anotation
+	
+	
+	/**
+	 * @return the {@link Rerank} annotation, null if there is none
+	 */
+	private Rerank getRerankAnnotation() {
+		return this.method.getAnnotation(Rerank.class);
+	}
+	
+	private boolean hasRerankAnnotation() {
+		return getRerankAnnotation() != null;
+	}
+	
+	/**
+	 * @return null if {@link Rerank#reRankDocs()} is null or negative
+	 */
+	public Integer getReRankDocs() {
+		if (hasRerankAnnotation()) {
+			return getAnnotationValueAsIntOrNullIfNegative(getRerankAnnotation(), "reRankDocs");
+		}
+		return null;
+	}
+	
+	/**
+	 * @return null if {@link Rerank#reRankWt()} is null or negative
+	 */
+	public Integer getReRankWt() {
+		if (hasRerankAnnotation()) {
+			return getAnnotationValueAsIntOrNullIfNegative(getRerankAnnotation(), "reRankWt");
+		}
+		return null;
+	}
+	
+	/**
+	 * @return null if {@link Rerank#value()} is null or blank
+	 */
+	public String getAnnotatedRerank() {
+		return getAnnotationValueAsStringOrNullIfBlank(getRerankAnnotation(), "value");
+	}
+	
+	
 	/**
 	 * @return the {@link Stats} annotation, null if there is none
 	 */

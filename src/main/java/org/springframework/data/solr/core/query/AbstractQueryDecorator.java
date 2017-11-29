@@ -58,6 +58,11 @@ public abstract class AbstractQueryDecorator implements Query {
 	public Join getJoin() {
 		return this.query.getJoin();
 	}
+	
+	@Override
+	public String getRqqValue() {
+		return this.query.getRqqValue();
+	}
 
 	@Override
 	public <T extends Query> T addProjectionOnField(Field field) {
@@ -153,6 +158,11 @@ public abstract class AbstractQueryDecorator implements Query {
 	@Override
 	public <T extends Query> T setOffset(Integer offset) {
 		return this.query.setOffset(offset);
+	}
+	
+	@Override
+	public <T extends Query> T setReRank(String rqqValue) {
+		return this.query.setReRank(rqqValue);
 	}
 
 	@Override

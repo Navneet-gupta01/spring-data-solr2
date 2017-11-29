@@ -177,6 +177,15 @@ public interface Query extends SolrDataQuery {
 	 * @return
 	 */
 	Integer getTimeAllowed();
+	
+	/**
+	 * Set the rerank value.
+	 * 
+	 * @param offset
+	 * @return
+	 * @since 1.3
+	 */
+	<T extends Query> T setReRank(String rqqValue);
 
 	/**
 	 * Set the default operator {@code q.op} for query expressions
@@ -258,5 +267,12 @@ public interface Query extends SolrDataQuery {
 	 * @since 2.1
 	 */
 	SpellcheckOptions getSpellcheckOptions();
+	
+	/**
+	 * Return the time (in milliseconds) allowed for a search to finish
+	 * 
+	 * @return
+	 */
+	String getRqqValue();
 
 }

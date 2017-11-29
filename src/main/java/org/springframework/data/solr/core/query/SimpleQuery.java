@@ -44,6 +44,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 
 	private Operator defaultOperator;
 	private Integer timeAllowed;
+	private String rqqValue;
 	private String defType;
 
 	private GroupOptions groupOptions;
@@ -384,5 +385,23 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	@Override
 	public SpellcheckOptions getSpellcheckOptions() {
 		return this.spellcheckOptions;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.data.solr.core.query.Query#setReRank(java.lang.String)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Query> T setReRank(String rqqValue) {
+		this.rqqValue=rqqValue;
+		return (T) this;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.data.solr.core.query.Query#getRqqValue()
+	 */
+	@Override
+	public String getRqqValue() {
+		return this.rqqValue;
 	}
 }

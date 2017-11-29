@@ -115,16 +115,32 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 		appendTimeAllowed(solrQuery, query.getTimeAllowed());
 		appendDefType(solrQuery, query.getDefType());
 		appendRequestHandler(solrQuery, query.getRequestHandler());
-
+		appendReRankQueryHandler(solrQuery,query.getRqqValue());
+		
 		processGroupOptions(solrQuery, query);
 		processStatsOptions(solrQuery, query);
 		processSpellcheckOptions(solrQuery, query);
 
+		LOGGER.info("solrQuery.toQueryString() ================= "+ solrQuery.toQueryString());
+		LOGGER.info("solrQuery.toString() == ========= " + solrQuery.toString());
+		
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Constructed SolrQuery:\r\n %s", solrQuery);
 		}
 	}
 
+	/**
+	 * @param solrQuery
+	 * @param rqqValue
+	 */
+	private void appendReRankQueryHandler(SolrQuery solrQuery, String rqqValue) {
+		if(StringUtils.isNotBlank(rqqValue)) {
+			solrQuery.set("rq", "{!rerank reRankQuery=$rqq reRankDocs=1000 reRankWeight=3}");
+			solrQuery.set("rqq", rqqValue);
+		}
+	}
+
+	
 	private void processFacetOptions(SolrQuery solrQuery, FacetQuery query) {
 		if (enableFaceting(solrQuery, query)) {
 			appendFacetingOnFields(solrQuery, (FacetQuery) query);

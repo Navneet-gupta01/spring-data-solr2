@@ -21,8 +21,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.solr.common.params.HighlightParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
@@ -76,8 +74,6 @@ public abstract class AbstractSolrQuery implements RepositoryQuery {
 
 	private static final Pattern PARAMETER_PLACEHOLDER = Pattern.compile("\\?(\\d+)");
 	
-	private static final Logger logger = LoggerFactory.getLogger(AbstractSolrQuery.class);
-
 	private final SolrOperations solrOperations;
 	private final SolrQueryMethod solrQueryMethod;
 
@@ -177,7 +173,6 @@ public abstract class AbstractSolrQuery implements RepositoryQuery {
 	 * @param query
 	 */
 	private void setReRankIfDefined(Query query) {
-		logger.info(" void setReRankIfDefined(Query query)" + solrQueryMethod.toString());
 		String rqqValue = solrQueryMethod.getRqqValue();
 		if(rqqValue!=null) {
 			query.setRqqValue(rqqValue);

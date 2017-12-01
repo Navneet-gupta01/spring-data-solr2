@@ -25,6 +25,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.projection.ProjectionFactory;
@@ -54,6 +56,8 @@ import org.springframework.util.StringUtils;
  * @author Francisco Spaeth
  */
 public class SolrQueryMethod extends QueryMethod {
+	
+	private static final Logger logger = LoggerFactory.getLogger(SolrQueryMethod.class);
 
 	private final Method method;
 
@@ -131,7 +135,10 @@ public class SolrQueryMethod extends QueryMethod {
 	 * @return null if {@link Query#rqqValue()} is null or blank
 	 */
 	public String getRqqValue() {
+		logger.info("hasQueryAnnotation ==" + hasQueryAnnotation());
 		if (hasQueryAnnotation()) {
+			String res = getAnnotationValueAsStringOrNullIfBlank(getQueryAnnotation(), "rqqValue");
+			logger.info("SolrQueryMethod :: Inside getAnnotatedNamedQueryName  ==========  " + res);
 			return getAnnotationValueAsStringOrNullIfBlank(getQueryAnnotation(), "rqqValue");
 		}
 		return null;
@@ -576,6 +583,7 @@ public class SolrQueryMethod extends QueryMethod {
 
 	private String getAnnotationValueAsStringOrNullIfBlank(Annotation annotation, String attributeName) {
 		String value = (String) AnnotationUtils.getValue(annotation, attributeName);
+		logger.info("value ======= " + value);
 		return StringUtils.hasText(value) ? value : null;
 	}
 

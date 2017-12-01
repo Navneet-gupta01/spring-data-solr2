@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.Assert;
@@ -33,6 +35,8 @@ import org.springframework.util.Assert;
  * @author Francisco Spaeth
  */
 public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
+	
+	private static final Logger logger = LoggerFactory.getLogger(SimpleQuery.class);
 
 	private List<Field> projectionOnFields = new ArrayList<Field>(0);
 	private List<FilterQuery> filterQueries = new ArrayList<FilterQuery>(0);;
@@ -96,6 +100,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	}
 
 	public static <T extends SimpleQuery> T fromQuery(Query source, T destination) {
+		logger.info("---------<T extends SimpleQuery> T fromQuery(Query source, T destination)-------------");
 		if (source == null || destination == null) {
 			return null;
 		}
@@ -251,7 +256,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 
 	@Override
 	public Pageable getPageRequest() {
-
+		logger.info("---------Pageable getPageRequest()-------------");
 		if (this.rows == null && this.offset == null) {
 			return null;
 		}
@@ -296,12 +301,14 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends Query> T setTimeAllowed(Integer timeAllowed) {
+		logger.info("-------------- <T extends Query> T setTimeAllowed(Integer timeAllowed) ----------------");
 		this.timeAllowed = timeAllowed;
 		return (T) this;
 	}
 
 	@Override
 	public Integer getTimeAllowed() {
+		logger.info("--------------  Integer getTimeAllowed() ----------------");
 		return this.timeAllowed;
 	}
 
@@ -397,6 +404,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends Query> T setRqqValue(String rqqValue) {
+		logger.info("-------------- <T extends Query> T setRqqValue(String rqqValue) ----------------");
 		this.rqqValue=rqqValue;
 		return (T) this;
 	}
@@ -406,6 +414,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	 */
 	@Override
 	public String getRqqValue() {
+		logger.info("--------------String getRqqValue() ----------------");
 		return this.rqqValue;
 	}
 }

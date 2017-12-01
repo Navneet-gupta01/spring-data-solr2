@@ -28,6 +28,8 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SpatialParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.data.geo.Box;
@@ -72,6 +74,8 @@ public abstract class QueryParserBase<QUERYTPYE extends SolrDataQuery> implement
 	protected static final String DELIMINATOR = ":";
 	protected static final String NOT = "-";
 	protected static final String BOOST = "^";
+	
+	private final Logger log = LoggerFactory.getLogger(QueryParserBase.class);
 
 	protected final GenericConversionService conversionService = new GenericConversionService();
 	private final List<PredicateProcessor> critieraEntryProcessors = new ArrayList<PredicateProcessor>();
@@ -110,12 +114,30 @@ public abstract class QueryParserBase<QUERYTPYE extends SolrDataQuery> implement
 
 	@Override
 	public String getQueryString(SolrDataQuery query) {
+		log.info("query.toString()" + query.toString());
 		if (query.getCriteria() == null) {
 			return null;
 		}
-
+		log.info("query.getCriteria() ============" + query.getCriteria().toString());
 		String queryString = createQueryStringFromNode(query.getCriteria());
+		if(queryString != null && queryString.indexOf("rqq")>-1)
+			queryString = queryString.substring(0,queryString.indexOf("rqq"));
+		log.info("===========queryString==========" + queryString);
 		queryString = prependJoin(queryString, query);
+		log.info("------------queryString-------------" + queryString);
+		return queryString;
+	}
+	
+	public String getRqqValue(SolrDataQuery query) {
+		log.info("query.toString()" + query.toString());
+		if (query.getCriteria() == null) {
+			return null;
+		}
+		log.info("query.getCriteria() ============" + query.getCriteria().toString());
+		String queryString = createQueryStringFromNode(query.getCriteria());
+		int indexOfRqq = queryString.indexOf("rqq");
+		if(queryString != null && indexOfRqq > -1 && indexOfRqq+4 < queryString.length())
+			queryString = queryString.substring(indexOfRqq+4);
 		return queryString;
 	}
 

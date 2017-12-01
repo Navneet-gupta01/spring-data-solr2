@@ -30,7 +30,7 @@ import org.springframework.util.ClassUtils;
  * @since 1.4
  */
 public abstract class AbstractQueryDecorator implements Query {
-
+	
 	private Query query;
 
 	public AbstractQueryDecorator(Query query) {
@@ -162,7 +162,6 @@ public abstract class AbstractQueryDecorator implements Query {
 	
 	@Override
 	public <T extends Query> T setRqqValue(String rqqValue) {
-		logger.info("=====================<T extends Query> T setRqqValue(String rqqValue)----------------" + rqqValue);
 		return this.query.setRqqValue(rqqValue);
 	}
 

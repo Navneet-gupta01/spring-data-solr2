@@ -92,10 +92,8 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 		Assert.notNull(query.getCriteria(), "Query has to have a criteria.");
 
 		SolrQuery solrQuery = new SolrQuery();
-		LOGGER.info("doConstructSolrQuery  solrQuery.toString() == ========= " + solrQuery.toString());
 		solrQuery.setParam(CommonParams.Q, getQueryString(query));
 		if (query instanceof Query) {
-			//processQueryRqqOption(solrQuery,query);
 			processQueryOptions(solrQuery, (Query) query);
 		}
 		if (query instanceof FacetQuery) {
@@ -108,31 +106,16 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 		return solrQuery;
 	}
 
-	private void processQueryRqqOption(SolrQuery solrQuery, SolrDataQuery query) {
-		appendReRankQueryHandler2(solrQuery,query);
-	}
-
 	private void processQueryOptions(SolrQuery solrQuery, Query query) {
-		LOGGER.info("query.toString() == ========= " + query.toString());
-		LOGGER.info("solrQuery.toString() == ========= " + solrQuery.toString());
 		appendPagination(solrQuery, query.getOffset(), query.getRows());
-		LOGGER.info("appendPagination  solrQuery.toString() == ========= " + solrQuery.toString());
 		appendProjectionOnFields(solrQuery, query.getProjectionOnFields());
-		LOGGER.info("appendProjectionOnFields  solrQuery.toString() == ========= " + solrQuery.toString());
 		appendFilterQuery(solrQuery, query.getFilterQueries());
-		LOGGER.info("appendFilterQuery  solrQuery.toString() == ========= " + solrQuery.toString());
 		appendSort(solrQuery, query.getSort());
-		LOGGER.info("appendSort  solrQuery.toString() == ========= " + solrQuery.toString());
 		appendDefaultOperator(solrQuery, query.getDefaultOperator());
-		LOGGER.info("appendDefaultOperator  solrQuery.toString() == ========= " + solrQuery.toString());
 		appendTimeAllowed(solrQuery, query.getTimeAllowed());
-		LOGGER.info("appendTimeAllowed  solrQuery.toString() == ========= " + solrQuery.toString());
 		appendDefType(solrQuery, query.getDefType());
-		LOGGER.info("appendDefType   solrQuery.toString() == ========= " + solrQuery.toString());
 		appendRequestHandler(solrQuery, query.getRequestHandler());
-		LOGGER.info("appendRequestHandler   solrQuery.toString() == ========= " + solrQuery.toString());
 		appendReRankQueryHandler(solrQuery,query.getRqqValue());
-		LOGGER.info("appendReRankQueryHandler   solrQuery.toString() == ========= " + solrQuery.toString());
 		
 		processGroupOptions(solrQuery, query);
 		processStatsOptions(solrQuery, query);
@@ -151,27 +134,12 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 	 * @param rqqValue
 	 */
 	private void appendReRankQueryHandler(SolrQuery solrQuery, String rqqValue) {
-		LOGGER.info("Inside appendReRankQueryHandler ==== " + rqqValue);
 		if(StringUtils.isNotBlank(rqqValue)) {
 			LOGGER.info("Inside appendReRankQueryHandler and rqqValue is not blank with value : " + rqqValue);
 			solrQuery.set("rq", "{!rerank reRankQuery=$rqq reRankDocs=1000 reRankWeight=3}");
 			solrQuery.set("rqq", rqqValue);
-			LOGGER.info("--------------------- solrQuery.toQueryString() =------------------"+solrQuery.toQueryString());
 		}
 	}
-	
-	private void appendReRankQueryHandler2(SolrQuery solrQuery, SolrDataQuery query) {
-		String rqqValue = ((Query)query).getRqqValue();
-		LOGGER.info("Inside appendReRankQueryHandler2 ==== " + rqqValue);
-		if(StringUtils.isNotBlank(rqqValue)) {
-			String realRqqValueFromQuery = getRqqValue(query);
-			LOGGER.info("Inside appendReRankQueryHandler2 and rqqValue is not blank with value : " + realRqqValueFromQuery);
-			solrQuery.set("rq", "{!rerank reRankQuery=$rqq reRankDocs=1000 reRankWeight=3}");
-			solrQuery.set("rqq", realRqqValueFromQuery);
-			LOGGER.info("--------------------- solrQuery.toQueryString() =------------------"+solrQuery.toQueryString());
-		}
-	}
-
 	
 	private void processFacetOptions(SolrQuery solrQuery, FacetQuery query) {
 		if (enableFaceting(solrQuery, query)) {

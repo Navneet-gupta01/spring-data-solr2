@@ -40,22 +40,28 @@ import org.springframework.data.solr.core.convert.NumberConverters;
 import org.springframework.data.solr.core.geo.GeoConverters;
 import org.springframework.data.solr.core.query.AbstractFacetAndHighlightQueryDecorator;
 import org.springframework.data.solr.core.query.AbstractFacetQueryDecorator;
+import org.springframework.data.solr.core.query.AbstractFacetSpatialAndHighLightQueryDecorator;
 import org.springframework.data.solr.core.query.AbstractHighlightQueryDecorator;
 import org.springframework.data.solr.core.query.AbstractQueryDecorator;
+import org.springframework.data.solr.core.query.AbstractSpatialAndHighLightQueryDecorator;
+import org.springframework.data.solr.core.query.AbstractSpatialQueryDecorator;
 import org.springframework.data.solr.core.query.CalculatedField;
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.Criteria.OperationKey;
 import org.springframework.data.solr.core.query.Criteria.Predicate;
 import org.springframework.data.solr.core.query.FacetAndHighlightQuery;
 import org.springframework.data.solr.core.query.FacetQuery;
+import org.springframework.data.solr.core.query.FacetSpatialAndHighLightQuery;
 import org.springframework.data.solr.core.query.Field;
 import org.springframework.data.solr.core.query.Function;
+import org.springframework.data.solr.core.query.HighLightAndSpatialQuery;
 import org.springframework.data.solr.core.query.HighlightQuery;
 import org.springframework.data.solr.core.query.Node;
 import org.springframework.data.solr.core.query.Query;
 import org.springframework.data.solr.core.query.Query.Operator;
 import org.springframework.data.solr.core.query.QueryStringHolder;
 import org.springframework.data.solr.core.query.SolrDataQuery;
+import org.springframework.data.solr.core.query.SpatialQuery;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -891,6 +897,103 @@ public abstract class QueryParserBase<QUERYTPYE extends SolrDataQuery> implement
 		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.data.solr.core.QueryParserBase.NamedObjects#getNamesAssociation()
+		 */
+		@Override
+		public Map<String, Object> getNamesAssociation() {
+			return Collections.unmodifiableMap(namesAssociation);
+		}
+	}
+	
+	static class NamedObjectsSpatialQuery extends AbstractSpatialQueryDecorator
+			implements NamedObjects {
+
+		private Map<String, Object> namesAssociation = new HashMap<String, Object>();
+
+		public NamedObjectsSpatialQuery(SpatialQuery query) {
+			super(query);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.springframework.data.solr.core.QueryParserBase.NamedObjects#setName(java.
+		 * lang.Object, java.lang.String)
+		 */
+		@Override
+		public void setName(Object object, String name) {
+			setObjectName(namesAssociation, object, name);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.springframework.data.solr.core.QueryParserBase.NamedObjects#
+		 * getNamesAssociation()
+		 */
+		@Override
+		public Map<String, Object> getNamesAssociation() {
+			return Collections.unmodifiableMap(namesAssociation);
+		}
+	}
+	
+	static class NamedObjectsHighLightAndSpatialQuery extends AbstractSpatialAndHighLightQueryDecorator implements NamedObjects {
+
+		private Map<String, Object> namesAssociation = new HashMap<String, Object>();
+
+		public NamedObjectsHighLightAndSpatialQuery(HighLightAndSpatialQuery query) {
+			super(query);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.springframework.data.solr.core.QueryParserBase.NamedObjects#setName(java.
+		 * lang.Object, java.lang.String)
+		 */
+		@Override
+		public void setName(Object object, String name) {
+			setObjectName(namesAssociation, object, name);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.springframework.data.solr.core.QueryParserBase.NamedObjects#
+		 * getNamesAssociation()
+		 */
+		@Override
+		public Map<String, Object> getNamesAssociation() {
+			return Collections.unmodifiableMap(namesAssociation);
+		}
+	}
+
+	static class NamedObjectsFacetSpatialAndHighLightQuery extends AbstractFacetSpatialAndHighLightQueryDecorator implements NamedObjects {
+
+		private Map<String, Object> namesAssociation = new HashMap<String, Object>();
+
+		public NamedObjectsFacetSpatialAndHighLightQuery(FacetSpatialAndHighLightQuery query) {
+			super(query);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.springframework.data.solr.core.QueryParserBase.NamedObjects#setName(java.
+		 * lang.Object, java.lang.String)
+		 */
+		@Override
+		public void setName(Object object, String name) {
+			setObjectName(namesAssociation, object, name);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.springframework.data.solr.core.QueryParserBase.NamedObjects#
+		 * getNamesAssociation()
 		 */
 		@Override
 		public Map<String, Object> getNamesAssociation() {

@@ -39,6 +39,7 @@ import org.springframework.data.solr.repository.Pivot;
 import org.springframework.data.solr.repository.Query;
 import org.springframework.data.solr.repository.Rerank;
 import org.springframework.data.solr.repository.SelectiveStats;
+import org.springframework.data.solr.repository.Spatial;
 import org.springframework.data.solr.repository.Spellcheck;
 import org.springframework.data.solr.repository.Stats;
 import org.springframework.data.util.ClassTypeInformation;
@@ -278,7 +279,46 @@ public class SolrQueryMethod extends QueryMethod {
 		return getAnnotationValueAsStringOrNullIfBlank(getRerankAnnotation(), "value");
 	}
 	
-	
+	// Spatial Search Anotation
+
+	/**
+	 * @return the {@link Rerank} annotation, null if there is none
+	 */
+	private Spatial getSpatialAnnotation() {
+		return this.method.getAnnotation(Spatial.class);
+	}
+
+	private boolean hasSpatialAnnotation() {
+		return getSpatialAnnotation() != null;
+	}
+
+	/**
+	 * @return null if {@link Rerank#pt()} is null or blank
+	 */
+	public String getSpatialPt() {
+		if (hasSpatialAnnotation()) {
+			return getAnnotationValueAsStringOrNullIfBlank(getRerankAnnotation(), "pt");
+		}
+		return null;
+	}
+
+	/**
+	 * @return null if {@link Rerank#d()} is null or negative
+	 */
+	public Integer getSpatialD() {
+		if (hasSpatialAnnotation()) {
+			return getAnnotationValueAsIntOrNullIfNegative(getRerankAnnotation(), "d");
+		}
+		return null;
+	}
+
+	/**
+	 * @return null if {@link Rerank#sField()} is null or blank
+	 */
+	public String getSpatialSField() {
+		return getAnnotationValueAsStringOrNullIfBlank(getRerankAnnotation(), "sField");
+	}
+
 	/**
 	 * @return the {@link Stats} annotation, null if there is none
 	 */

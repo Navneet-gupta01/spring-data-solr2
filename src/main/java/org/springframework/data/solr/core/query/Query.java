@@ -185,7 +185,7 @@ public interface Query extends SolrDataQuery {
 	 * @return
 	 * @since 1.3
 	 */
-	<T extends Query> T setReRank(String rqqValue);
+	<T extends Query> T setRqqValue(String rqqValue);
 
 	/**
 	 * Set the default operator {@code q.op} for query expressions

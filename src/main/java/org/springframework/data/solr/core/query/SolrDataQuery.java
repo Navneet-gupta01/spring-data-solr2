@@ -26,7 +26,7 @@ public interface SolrDataQuery {
 	 * Append criteria to query. Criteria must not be null, nor point to a field with null value.
 	 * 
 	 * @param criteria
-	 * @return
+	 * @return   
 	 */
 	<T extends SolrDataQuery> T addCriteria(Criteria criteria);
 

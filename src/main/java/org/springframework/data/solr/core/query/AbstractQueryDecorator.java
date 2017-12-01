@@ -161,8 +161,9 @@ public abstract class AbstractQueryDecorator implements Query {
 	}
 	
 	@Override
-	public <T extends Query> T setReRank(String rqqValue) {
-		return this.query.setReRank(rqqValue);
+	public <T extends Query> T setRqqValue(String rqqValue) {
+		logger.info("=====================<T extends Query> T setRqqValue(String rqqValue)----------------" + rqqValue);
+		return this.query.setRqqValue(rqqValue);
 	}
 
 	@Override

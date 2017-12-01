@@ -177,9 +177,10 @@ public abstract class AbstractSolrQuery implements RepositoryQuery {
 	 * @param query
 	 */
 	private void setReRankIfDefined(Query query) {
-		String rqqValue = query.getRqqValue();
+		logger.info(" void setReRankIfDefined(Query query)" + solrQueryMethod.toString());
+		String rqqValue = solrQueryMethod.getRqqValue();
 		if(rqqValue!=null) {
-			query.setReRank(rqqValue);
+			query.setRqqValue(rqqValue);
 		}
 	}
 	

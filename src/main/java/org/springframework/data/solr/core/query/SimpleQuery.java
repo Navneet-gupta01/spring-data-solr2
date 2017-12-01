@@ -133,7 +133,11 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 		if (source.getTimeAllowed() != null) {
 			destination.setTimeAllowed(source.getTimeAllowed());
 		}
-
+		
+		if (source.getRqqValue() != null) {
+			destination.setRqqValue(source.getRqqValue());
+		}
+		
 		if (source.getRequestHandler() != null) {
 			destination.setRequestHandler(source.getRequestHandler());
 		}
@@ -392,7 +396,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Query> T setReRank(String rqqValue) {
+	public <T extends Query> T setRqqValue(String rqqValue) {
 		this.rqqValue=rqqValue;
 		return (T) this;
 	}

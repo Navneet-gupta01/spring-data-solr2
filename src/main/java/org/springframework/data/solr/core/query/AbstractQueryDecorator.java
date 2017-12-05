@@ -225,6 +225,20 @@ public abstract class AbstractQueryDecorator implements Query {
 	public SpellcheckOptions getSpellcheckOptions() {
 		return query.getSpellcheckOptions();
 	}
+	
+	@Override
+	public <T extends Query> T setSpatialSearchOptions(SpatialSearchOptions spatialSearchOptions) {
+		return query.setSpatialSearchOptions(spatialSearchOptions);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.data.solr.core.query.Query#getSpellcheckOptions()
+	 */
+	@Override
+	public SpatialSearchOptions getSpatialSearchOptions() {
+		return query.getSpatialSearchOptions();
+	}
 
 	/**
 	 * Get the {@link Class} of the originally decorated query.

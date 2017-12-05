@@ -54,6 +54,7 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	private GroupOptions groupOptions;
 	private StatsOptions statsOptions;
 	private SpellcheckOptions spellcheckOptions;
+	private SpatialSearchOptions spatialSearchOptions;
 
 	public SimpleQuery() {}
 
@@ -416,5 +417,23 @@ public class SimpleQuery extends AbstractQuery implements Query, FilterQuery {
 	public String getRqqValue() {
 		logger.info("--------------String getRqqValue() ----------------");
 		return this.rqqValue;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.data.solr.core.query.Query#setSpatialSearchOptions(org.springframework.data.solr.core.query.SpatialSearchOptions)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Query> T setSpatialSearchOptions(SpatialSearchOptions spatialSearchOptions) {
+		this.spatialSearchOptions = spatialSearchOptions;
+		return (T) this;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.data.solr.core.query.Query#getSpatialSearchOptions()
+	 */
+	@Override
+	public SpatialSearchOptions getSpatialSearchOptions() {
+		return this.spatialSearchOptions;
 	}
 }

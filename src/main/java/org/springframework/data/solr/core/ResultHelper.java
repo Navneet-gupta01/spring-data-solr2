@@ -34,6 +34,7 @@ import org.apache.solr.client.solrj.response.PivotField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.RangeFacet;
 import org.apache.solr.client.solrj.response.SpellCheckResponse;
+import org.apache.solr.client.solrj.response.SuggesterResponse;
 import org.apache.solr.client.solrj.response.TermsResponse;
 import org.apache.solr.client.solrj.response.TermsResponse.Term;
 import org.apache.solr.common.SolrDocumentList;
@@ -87,6 +88,30 @@ final class ResultHelper {
 
 	private ResultHelper() {}
 
+	
+//	static Map<String, List<TermsFieldEntry>> convertSuggesterQueryResponseToSuggesterMap(QueryResponse response) {
+//		if (response == null || response.getTermsResponse() == null || response.getTermsResponse().getTermMap() == null) {
+//			return Collections.emptyMap();
+//		}
+//
+//		SuggesterResponse suggesterResponse = response.getSuggesterResponse();
+//		Map<String, List<TermsFieldEntry>> result = new LinkedHashMap<String, List<TermsFieldEntry>>(
+//				termsResponse.getTermMap().size());
+//
+//		for (Map.Entry<String, List<Term>> entry : termsResponse.getTermMap().entrySet()) {
+//			List<TermsFieldEntry> terms = new ArrayList<TermsFieldEntry>(entry.getValue().size());
+//			for (Term term : entry.getValue()) {
+//				SimpleTermsFieldEntry termsEntry = new SimpleTermsFieldEntry(term.getTerm(), term.getFrequency());
+//				termsEntry.setField(entry.getKey());
+//				terms.add(termsEntry);
+//			}
+//			result.put(entry.getKey(), terms);
+//		}
+//
+//		return result;
+//	}
+	
+	
 	static Map<String, List<TermsFieldEntry>> convertTermsQueryResponseToTermsMap(QueryResponse response) {
 		if (response == null || response.getTermsResponse() == null || response.getTermsResponse().getTermMap() == null) {
 			return Collections.emptyMap();

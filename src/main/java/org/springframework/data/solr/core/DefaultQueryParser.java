@@ -29,6 +29,7 @@ import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.GroupParams;
 import org.apache.solr.common.params.HighlightParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.SpatialParams;
 import org.apache.solr.common.params.SpellingParams;
 import org.apache.solr.common.params.StatsParams;
 import org.slf4j.Logger;
@@ -55,6 +56,7 @@ import org.springframework.data.solr.core.query.HighlightQuery;
 import org.springframework.data.solr.core.query.Query;
 import org.springframework.data.solr.core.query.QueryParameter;
 import org.springframework.data.solr.core.query.SolrDataQuery;
+import org.springframework.data.solr.core.query.SpatialSearchOptions;
 import org.springframework.data.solr.core.query.SpellcheckOptions;
 import org.springframework.data.solr.core.query.StatsOptions;
 import org.springframework.util.Assert;
@@ -120,6 +122,7 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 		processGroupOptions(solrQuery, query);
 		processStatsOptions(solrQuery, query);
 		processSpellcheckOptions(solrQuery, query);
+		processSpatialSearchOptions(solrQuery,query);
 
 		LOGGER.info("solrQuery.toQueryString() ================= "+ solrQuery.toQueryString());
 		LOGGER.info("solrQuery.toString() == ========= " + solrQuery.toString());
@@ -127,6 +130,21 @@ public class DefaultQueryParser extends QueryParserBase<SolrDataQuery> {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Constructed SolrQuery:\r\n %s", solrQuery);
 		}
+	}
+
+	/**
+	 * @param solrQuery
+	 * @param query
+	 */
+	private void processSpatialSearchOptions(SolrQuery solrQuery, Query query) {
+		SpatialSearchOptions spatialOptions = query.getSpatialSearchOptions();
+		if(spatialOptions == null || StringUtils.isBlank(spatialOptions.getField()) || StringUtils.isBlank(spatialOptions.getPoint()) || StringUtils.split(spatialOptions.getPoint(), ",").length!=2) {
+			return;
+		}
+		
+		solrQuery.set(SpatialParams.FIELD, spatialOptions.getField());
+		solrQuery.set(SpatialParams.DISTANCE, spatialOptions.getDistance());
+		solrQuery.set(SpatialParams.POINT, spatialOptions.getPoint());
 	}
 
 	/**

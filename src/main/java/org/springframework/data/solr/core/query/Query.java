@@ -274,5 +274,9 @@ public interface Query extends SolrDataQuery {
 	 * @return
 	 */
 	String getRqqValue();
+	
+	<T extends Query> T setSpatialSearchOptions(SpatialSearchOptions spatialSearchOptions);
+	
+	SpatialSearchOptions getSpatialSearchOptions();
 
 }

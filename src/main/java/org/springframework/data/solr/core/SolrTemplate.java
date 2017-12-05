@@ -65,6 +65,7 @@ import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.HighlightQuery;
 import org.springframework.data.solr.core.query.Query;
 import org.springframework.data.solr.core.query.SolrDataQuery;
+import org.springframework.data.solr.core.query.SuggestQuery;
 import org.springframework.data.solr.core.query.TermsQuery;
 import org.springframework.data.solr.core.query.result.Cursor;
 import org.springframework.data.solr.core.query.result.DelegatingCursor;
@@ -991,6 +992,32 @@ public class SolrTemplate implements SolrOperations, InitializingBean, Applicati
 		TermsResultPage page = new TermsResultPage();
 		page.addAllTerms(ResultHelper.convertTermsQueryResponseToTermsMap(response));
 		return page;
+	}
+	
+	@Override
+	public Object queryForSuggesterPage(SuggestQuery query) {
+		return queryForSuggesterPage(query, getDefaultRequestMethod());
+	}
+
+	@Override
+	public Object queryForSuggesterPage(String collectionName, SuggestQuery query) {
+		return queryForSuggesterPage(collectionName, query, getDefaultRequestMethod());
+	}
+
+	@Override
+	public Object queryForSuggesterPage(SuggestQuery query, RequestMethod method) {
+		return queryForSuggesterPage(null, query, method);
+	}
+	
+	public Object queryForSuggesterPage(String collectionName, SuggestQuery query, RequestMethod method) {
+
+		Assert.notNull(query, "Query must not be 'null'.");
+
+		QueryResponse response = querySolr(collectionName, query, null, method);
+
+//		TermsResultPage page = new TermsResultPage();
+//		page.addAllTerms(ResultHelper.convertTermsQueryResponseToTermsMap(response));
+		return ResultHelper.convertSuggesterQueryResponseToSuggesterMap(response);
 	}
 
 	final QueryResponse querySolr(String collectionName, SolrDataQuery query, Class<?> clazz) {

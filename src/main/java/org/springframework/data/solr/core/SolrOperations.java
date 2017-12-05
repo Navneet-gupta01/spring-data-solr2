@@ -29,6 +29,7 @@ import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.HighlightQuery;
 import org.springframework.data.solr.core.query.Query;
 import org.springframework.data.solr.core.query.SolrDataQuery;
+import org.springframework.data.solr.core.query.SuggestQuery;
 import org.springframework.data.solr.core.query.TermsQuery;
 import org.springframework.data.solr.core.query.result.Cursor;
 import org.springframework.data.solr.core.query.result.FacetAndHighlightPage;
@@ -544,6 +545,34 @@ public interface SolrOperations {
 	 * @return
 	 */
 	TermsPage queryForTermsPage(TermsQuery query);
+	
+	/**
+	 * Execute query using suggest handler
+	 *
+	 * @param query must not be {@literal null}.
+	 * @return
+	 */
+	Object queryForSuggesterPage(SuggestQuery query);
+	
+	/**
+	 * Execute query using suggest against given collection.
+	 *
+	 * @param collectionName must not be {@literal null}.
+	 * @param query must not be {@literal null}.
+	 * @return
+	 * @since 2.1
+	 */
+	Object queryForSuggesterPage(String collectionName, SuggestQuery query);
+
+	/**
+	 * Execute query using suggest handler
+	 *
+	 * @param query must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.0
+	 */
+	Object queryForSuggesterPage(SuggestQuery query, RequestMethod method);
 
 	/**
 	 * Execute query using terms handler against given collection.

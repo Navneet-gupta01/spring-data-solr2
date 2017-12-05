@@ -25,6 +25,7 @@ import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.HighlightQuery;
 import org.springframework.data.solr.core.query.Query;
 import org.springframework.data.solr.core.query.SolrDataQuery;
+import org.springframework.data.solr.core.query.SuggestQuery;
 import org.springframework.data.solr.core.query.TermsQuery;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -41,8 +42,8 @@ public class QueryParsers {
 	private final Map<Class<?>, QueryParser> cache = new LinkedHashMap<Class<?>, QueryParser>();
 
 	public QueryParsers() {
-		this.parserPairs = new ArrayList<QueryParserPair>(4);
-
+		this.parserPairs = new ArrayList<QueryParserPair>(5);
+		parserPairs.add(new QueryParserPair(SuggestQuery.class, new SuggestQueryParser()));
 		parserPairs.add(new QueryParserPair(TermsQuery.class, new TermsQueryParser()));
 		parserPairs.add(new QueryParserPair(FacetQuery.class, DEFAULT_QUERY_PARSER));
 		parserPairs.add(new QueryParserPair(HighlightQuery.class, DEFAULT_QUERY_PARSER));

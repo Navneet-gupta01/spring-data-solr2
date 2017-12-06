@@ -4,6 +4,8 @@ package org.springframework.data.solr.core.query.result;
  * @author navneetgupta
  * @createdOn Dec 5, 2017
  */
-public interface SuggestEntry extends WeightEntry {
-	String getPayLoad();
+public interface WeightEntry {
+	
+	long getWeight();
+	String getTerm();
 }

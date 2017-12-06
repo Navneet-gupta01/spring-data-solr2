@@ -73,6 +73,7 @@ import org.springframework.data.solr.core.query.result.SimpleTermsFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.data.solr.core.query.result.SpellcheckQueryResult.Alternative;
 import org.springframework.data.solr.core.query.result.StatsResult;
+import org.springframework.data.solr.core.query.result.SuggestDictionaryEntry;
 import org.springframework.data.solr.core.query.result.TermsFieldEntry;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -91,20 +92,21 @@ final class ResultHelper {
 	private ResultHelper() {}
 
 	
-	static Map<String, List<SimpleSuggestDictionaryEntry>> convertSuggesterQueryResponseToSuggesterMap(QueryResponse response) {
+	static Map<String, List<SuggestDictionaryEntry>> convertSuggesterQueryResponseToSuggesterMap(QueryResponse response) {
 		if (response == null || response.getSuggesterResponse() == null || response.getSuggesterResponse().getSuggestions() == null) {
 			return Collections.emptyMap();
 		}
 
 		SuggesterResponse suggesterResponse = response.getSuggesterResponse();
-		Map<String, List<SimpleSuggestDictionaryEntry>> result = new LinkedHashMap<String, List<SimpleSuggestDictionaryEntry>>(
+		Map<String, List<SuggestDictionaryEntry>> result = new LinkedHashMap<String, List<SuggestDictionaryEntry>>(
 				suggesterResponse.getSuggestions().size());
 
 		for (Map.Entry<String, List<Suggestion>> entry : suggesterResponse.getSuggestions().entrySet()) {
-			List<SimpleSuggestDictionaryEntry> terms = new ArrayList<SimpleSuggestDictionaryEntry>(entry.getValue().size());
+			List<SuggestDictionaryEntry> terms = new ArrayList<SuggestDictionaryEntry>(entry.getValue().size());
 			for (Suggestion term : entry.getValue()) {
-				SimpleSuggestDictionaryEntry suggestionEntry = new SimpleSuggestDictionaryEntry(term.getTerm(), term.getWeight(),term.getPayload());
-				suggestionEntry.setDictionaryName(entry.getKey());
+				SimpleSuggestDictionaryEntry suggestionEntry = new SimpleSuggestDictionaryEntry(term.getTerm(), term.getWeight());
+				suggestionEntry.setDictionary(entry.getKey());
+				suggestionEntry.setPayLoad(term.getPayload());
 				terms.add(suggestionEntry);
 			}
 			result.put(entry.getKey(), terms);

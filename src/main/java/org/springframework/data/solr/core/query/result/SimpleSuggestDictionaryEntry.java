@@ -4,24 +4,23 @@ package org.springframework.data.solr.core.query.result;
  * @author navneetgupta
  * @createdOn Dec 5, 2017
  */
-public class SimpleSuggestDictionaryEntry extends DictionarySuggestEntry  {
+public class SimpleSuggestDictionaryEntry extends DictionaryWeightTermEntry implements SuggestDictionaryEntry  {
 
 	/**
 	 * @param term
 	 * @param weight
-	 * @param payload
 	 */
-	public SimpleSuggestDictionaryEntry(String term, long weight, String payload) {
-		super(term, weight, payload);
+	public SimpleSuggestDictionaryEntry(String term, long weight) {
+		super(term, weight);
 	}
-	
+
 	/**
 	 * @param term
 	 * @param weight
-	 * @param payload
+	 * @param dictionary
 	 */
-	public SimpleSuggestDictionaryEntry(String dictionaryName, String term, long weight, String payload) {
-		super(term, weight, payload);
-		setDictionaryName(dictionaryName);
+	public SimpleSuggestDictionaryEntry(String term, long weight,String dictionary) {
+		super(term, weight);
+		setDictionary(dictionary);
 	}
 }

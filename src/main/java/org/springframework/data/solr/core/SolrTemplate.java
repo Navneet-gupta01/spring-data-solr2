@@ -77,6 +77,8 @@ import org.springframework.data.solr.core.query.result.ScoredPage;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.data.solr.core.query.result.SpellcheckQueryResult.Alternative;
 import org.springframework.data.solr.core.query.result.StatsPage;
+import org.springframework.data.solr.core.query.result.SuggestPage;
+import org.springframework.data.solr.core.query.result.SuggesterResultPage;
 import org.springframework.data.solr.core.query.result.TermsPage;
 import org.springframework.data.solr.core.query.result.TermsResultPage;
 import org.springframework.data.solr.core.schema.DefaultSchemaOperations;
@@ -995,29 +997,29 @@ public class SolrTemplate implements SolrOperations, InitializingBean, Applicati
 	}
 	
 	@Override
-	public Object queryForSuggesterPage(SuggestQuery query) {
+	public SuggestPage queryForSuggesterPage(SuggestQuery query) {
 		return queryForSuggesterPage(query, getDefaultRequestMethod());
 	}
 
 	@Override
-	public Object queryForSuggesterPage(String collectionName, SuggestQuery query) {
+	public SuggestPage queryForSuggesterPage(String collectionName, SuggestQuery query) {
 		return queryForSuggesterPage(collectionName, query, getDefaultRequestMethod());
 	}
 
 	@Override
-	public Object queryForSuggesterPage(SuggestQuery query, RequestMethod method) {
+	public SuggestPage queryForSuggesterPage(SuggestQuery query, RequestMethod method) {
 		return queryForSuggesterPage(null, query, method);
 	}
 	
-	public Object queryForSuggesterPage(String collectionName, SuggestQuery query, RequestMethod method) {
+	public SuggestPage queryForSuggesterPage(String collectionName, SuggestQuery query, RequestMethod method) {
 
 		Assert.notNull(query, "Query must not be 'null'.");
 
 		QueryResponse response = querySolr(collectionName, query, null, method);
 
-//		TermsResultPage page = new TermsResultPage();
-//		page.addAllTerms(ResultHelper.convertTermsQueryResponseToTermsMap(response));
-		return ResultHelper.convertSuggesterQueryResponseToSuggesterMap(response);
+		SuggesterResultPage page = new SuggesterResultPage();
+		page.addAllSuggestions(ResultHelper.convertSuggesterQueryResponseToSuggesterMap(response));
+		return page;
 	}
 
 	final QueryResponse querySolr(String collectionName, SolrDataQuery query, Class<?> clazz) {

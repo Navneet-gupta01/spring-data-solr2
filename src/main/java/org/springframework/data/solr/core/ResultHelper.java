@@ -72,6 +72,7 @@ import org.springframework.data.solr.core.query.result.SimpleSuggestDictionaryEn
 import org.springframework.data.solr.core.query.result.SimpleTermsFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.data.solr.core.query.result.SpellcheckQueryResult.Alternative;
+import org.springframework.data.solr.core.query.result.SpellcheckQueryResult.Collations;
 import org.springframework.data.solr.core.query.result.StatsResult;
 import org.springframework.data.solr.core.query.result.SuggestDictionaryEntry;
 import org.springframework.data.solr.core.query.result.TermsFieldEntry;
@@ -473,8 +474,9 @@ final class ResultHelper {
 
 				if (!CollectionUtils.isEmpty(suggestion.getAlternatives())) {
 					for (int i = 0; i < suggestion.getAlternatives().size(); i++) {
+						List<Integer> freq = suggestion.getAlternativeFrequencies();
 						alternatives.add(new Alternative(suggestion.getToken(), suggestion.getOriginalFrequency(),
-								suggestion.getAlternatives().get(i), suggestion.getAlternativeFrequencies().get(i)));
+								suggestion.getAlternatives().get(i), (freq != null) ? suggestion.getAlternativeFrequencies().get(i):Integer.valueOf(1)));
 					}
 				}
 				alternativesMap.put(suggestion.getToken(), alternatives);
@@ -482,6 +484,27 @@ final class ResultHelper {
 		}
 
 		return alternativesMap;
+	}
+
+
+	/**
+	 * @param response
+	 * @return
+	 */
+	static List<Collations> extreactCollations(QueryResponse response) {
+		if (response == null || response.getSpellCheckResponse() == null
+				|| response.getSpellCheckResponse().getSuggestions() == null) {
+			return Collections.emptyList();
+		}
+		List<Collations> collations = new ArrayList<Collations>();
+		SpellCheckResponse scr = response.getSpellCheckResponse();
+		if (scr != null && scr.getCollatedResults() != null) {
+			for (SpellCheckResponse.Collation collation : scr.getCollatedResults()) {
+
+				collations.add(new Collations(collation.getCollationQueryString(),collation.getNumberOfHits()));
+			}
+		}
+		return collations;
 	}
 
 }

@@ -58,6 +58,7 @@ public class SolrResultPage<T> extends PageImpl<T> implements FacetPage<T>, High
 	private Map<Object, GroupResult<T>> groupResults = Collections.emptyMap();
 	private Map<String, FieldStatsResult> fieldStatsResults;
 	private Map<String, List<Alternative>> suggestions = new LinkedHashMap<String, List<Alternative>>();
+	private List<Collations> collations;
 
 	public SolrResultPage(List<T> content) {
 		super(content);
@@ -322,6 +323,11 @@ public class SolrResultPage<T> extends PageImpl<T> implements FacetPage<T>, High
 		this.suggestions.put(term, suggestions);
 	}
 
+	@Override
+	public void addCollations(List<Collations> collations) {
+		this.collations = collations;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.data.solr.core.query.result.SpellcheckQueryResult#getAlternatives()
@@ -344,6 +350,14 @@ public class SolrResultPage<T> extends PageImpl<T> implements FacetPage<T>, High
 	public Collection<Alternative> getAlternatives(String term) {
 		return suggestions.containsKey(term) ? Collections.<Alternative> unmodifiableList(this.suggestions.get(term))
 				: Collections.<Alternative> emptyList();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.data.solr.core.query.result.SpellcheckQueryResult#getCollations()
+	 */
+	@Override
+	public Collection<Collations> getCollations() {
+		return collations;
 	}
 
 }

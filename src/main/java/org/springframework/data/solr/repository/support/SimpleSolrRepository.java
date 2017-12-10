@@ -146,7 +146,7 @@ public class SimpleSolrRepository<T, ID extends Serializable> implements SolrCru
 	public <S extends T> S save(S entity) {
 		Assert.notNull(entity, "Cannot save 'null' entity.");
 		registerTransactionSynchronisationIfSynchronisationActive();
-		this.solrOperations.saveBean(entity);
+		getSolrOperations().saveBean(entity);
 		commitIfTransactionSynchronisationIsInactive();
 		return entity;
 	}

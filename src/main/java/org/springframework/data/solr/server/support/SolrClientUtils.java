@@ -105,6 +105,8 @@ public class SolrClientUtils {
 			clone = cloneCloudSolrClient(solrClient, core);
 		} else if (shortName.equals("EmbeddedSolrServer")) {
 			clone = cloneEmbeddedSolrServer(solrClient, core);
+		} else if(shortName.equals("MyHttpSolrClient")) {
+			clone = cloneHttpSolrClient(solrClient, core);
 		}
 
 		if (clone == null) {

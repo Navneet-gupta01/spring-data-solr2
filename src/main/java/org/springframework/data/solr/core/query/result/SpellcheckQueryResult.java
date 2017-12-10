@@ -32,6 +32,13 @@ public interface SpellcheckQueryResult {
 	 * @return never {@literal null}.
 	 */
 	Collection<Alternative> getAlternatives();
+	
+	/**
+	 * Get all {@link Alternative}s;
+	 *
+	 * @return never {@literal null}.
+	 */
+	Collection<Collations> getCollations();
 
 	/**
 	 * Get the {@link Alternative}s for a given term.
@@ -57,6 +64,8 @@ public interface SpellcheckQueryResult {
 	Collection<String> getSuggestions(String term);
 
 	void addSuggestions(String term, List<Alternative> suggestions);
+	
+	void addCollations(List<Collations> collations);
 
 	/**
 	 * @author Christoph Strobl
@@ -69,5 +78,12 @@ public interface SpellcheckQueryResult {
 		private final int termFrequency;
 		private final String suggestion;
 		private final int suggestionFrequency;
+	}
+	
+	@Data
+	public static class Collations {
+
+		private final String query;
+		private final long hits;
 	}
 }

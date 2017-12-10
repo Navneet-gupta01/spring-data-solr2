@@ -76,6 +76,7 @@ import org.springframework.data.solr.core.query.result.HighlightPage;
 import org.springframework.data.solr.core.query.result.ScoredPage;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.data.solr.core.query.result.SpellcheckQueryResult.Alternative;
+import org.springframework.data.solr.core.query.result.SpellcheckQueryResult.Collations;
 import org.springframework.data.solr.core.query.result.StatsPage;
 import org.springframework.data.solr.core.query.result.SuggestPage;
 import org.springframework.data.solr.core.query.result.SuggesterResultPage;
@@ -950,6 +951,8 @@ public class SolrTemplate implements SolrOperations, InitializingBean, Applicati
 			for (Entry<String, List<Alternative>> entry : suggestions.entrySet()) {
 				page.addSuggestions(entry.getKey(), entry.getValue());
 			}
+			List<Collations> collations = ResultHelper.extreactCollations(response);
+			page.addCollations(collations);
 		}
 
 		return page;
@@ -1047,7 +1050,7 @@ public class SolrTemplate implements SolrOperations, InitializingBean, Applicati
 			}
 		}
 
-		LOGGER.debug("Executing query '" + solrQuery + "' against solr.");
+		LOGGER.info("Executing query '" + solrQuery + "' against solr.");
 
 		return executeSolrQuery(collectionName, solrQuery, getSolrRequestMethod(requestMethod));
 	}
